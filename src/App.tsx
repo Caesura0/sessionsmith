@@ -11,8 +11,8 @@ import { INTERVENTIONS, OBSERVATIONS } from "./data/option";
 import type { Option } from "./types/options";
 import { InlineSessionLine } from "./components/InlineSessionLine";
 import { PrintableNote, type NoteData } from "./components/PrintableNote";
-
-
+import { copyNoteToClipboard } from "./utils/clipboard";
+import { buildNoteHTML } from "./utils/noteFormat";
 
 // Utility that converts IDs → labels for display
 function toLabels(ids: string[], src: Option[]) {
@@ -27,12 +27,9 @@ export default function App() {
     const [themes, setThemes] = useState("");
 
     // Multi-select state (IDs)
-    const [interventions, setInterventions] = useState<string[]>([]);
-    const [observations, setObservations] = useState<string[]>([]);
+    const [interventionsIds, setInterventions] = useState<string[]>([]);
+    const [observationsIds, setObservations] = useState<string[]>([]);
 
-    //
-    const [interventionsIds, setInterventionsIds] = useState<string[]>([]);
-    const [observationsIds, setObservationsIds] = useState<string[]>([]);
 
     // Which picker is open? (null = none)
     const [picker, setPicker] = useState<null | "interventions" | "observations">(null);
@@ -55,6 +52,21 @@ export default function App() {
     plan,
     nextSessionISO: nextDate,
   };
+
+
+  
+  const [showPreview, setShowPreview] = useState(false);
+  
+  async function handleCopy() {
+    try {
+      await copyNoteToClipboard(noteData);
+      alert("Copied to clipboard (rich format) – paste into Word.");
+    } catch (e) {
+      console.error(e);
+      alert("Could not copy automatically. Open the preview and copy manually.");
+      setShowPreview(true);
+    }
+  }
 
   const handlePrint = () => {
     // Show system dialog -> choose “Save as PDF”
@@ -83,6 +95,8 @@ export default function App() {
       <section className="rounded-2xl border border-dark-3 bg-dark-2 p-4">
         <div className="mb-2 text-sm font-semibold text-light-3">Client update</div>
         <textarea
+          value={clientUpdate}                               // ← controlled by React state
+          onChange={(e) => setClientUpdate(e.target.value)}  // ← update state on typing
           className="w-full rounded-xl border border-dark-4 bg-dark-1 p-3 text-sm outline-none"
           rows={4}
           placeholder="Type the update…"
@@ -93,6 +107,8 @@ export default function App() {
       <section className="rounded-2xl border border-dark-3 bg-dark-2 p-4">
         <div className="mb-2 text-sm font-semibold text-light-3">Significant themes</div>
         <textarea
+          value={themes}                               // ← controlled by React state
+          onChange={(e) => setThemes(e.target.value)}  // ← update state on typing
           className="w-full rounded-xl border border-dark-4 bg-dark-1 p-3 text-sm outline-none"
           rows={4}
           placeholder="Type the themes…"
@@ -107,9 +123,9 @@ export default function App() {
       >
         <div className="mb-2 text-sm font-semibold text-light-3">Interventions included</div>
 
-        {interventions.length ? (
+        {interventionsIds.length ? (
           <div className="flex flex-wrap gap-2">
-            {toLabels(interventions, INTERVENTIONS).map((label) => (
+            {toLabels(interventionsIds, INTERVENTIONS).map((label) => (
               <span key={label} className="rounded-full bg-dark-3 px-3 py-1 text-sm">
                 {label}
               </span>
@@ -128,9 +144,9 @@ export default function App() {
       >
         <div className="mb-2 text-sm font-semibold text-light-3">Observations / Client response</div>
 
-        {observations.length ? (
+        {observationsIds.length ? (
           <div className="flex flex-wrap gap-2">
-            {toLabels(observations, OBSERVATIONS).map((label) => (
+            {toLabels(observationsIds, OBSERVATIONS).map((label) => (
               <span key={label} className="rounded-full bg-dark-3 px-3 py-1 text-sm">
                 {label}
               </span>
@@ -140,6 +156,8 @@ export default function App() {
           <div className="text-light-4">Click to select observations</div>
         )}
       </section>
+
+
 
       {/* Next session date */}
       <section className="rounded-2xl border border-dark-3 bg-dark-2 p-4">
@@ -158,7 +176,7 @@ export default function App() {
           className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-dark-1 hover:bg-light-1"
           onClick={() => {
             // TODO: persist to API/localStorage/etc.
-            console.log({ interventions, observations, nextDate });
+            console.log({ interventionsIds, observationsIds, nextDate });
           }}
         >
           Save
@@ -170,7 +188,7 @@ export default function App() {
         <FullScreenPicker
           title="Pick interventions"
           options={INTERVENTIONS}
-          selected={interventions}
+          selected={interventionsIds}
           onClose={() => setPicker(null)}
           onSave={(ids) => {
             setInterventions(ids);
@@ -183,7 +201,7 @@ export default function App() {
         <FullScreenPicker
           title="Pick observations"
           options={OBSERVATIONS}
-          selected={observations}
+          selected={observationsIds}
           onClose={() => setPicker(null)}
           onSave={(ids) => {
             setObservations(ids);
@@ -191,15 +209,28 @@ export default function App() {
           }}
         />
       )}
+    <div className="flex gap-2 print:hidden">
+      <button
+        onClick={handleCopy}
+        className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-dark-1 hover:bg-light-1"
+      >
+        Copy formatted to clipboard
+      </button>
 
+      <button
+        onClick={() => setShowPreview(v => !v)}
+        className="rounded-xl border border-light-3 px-4 py-2 text-sm hover:bg-dark-2"
+      >
+        {showPreview ? "Hide" : "Show"} copyable preview
+      </button>
+    </div>
         
         </div>
        
 
 
 
-        {/* Your selectors for interventions/observations should set interventionsIds/observationsIds */}
-        {/* ... */}
+
 
         <div className="pt-2">
           <button
