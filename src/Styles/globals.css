@@ -17,6 +17,12 @@
   --color-light-3: #d4d4d8;
   --color-light-4: #a1a1aa;
 }
+@media print {
+    /* Set nice page margins; adjust to taste */
+    @page { margin: 20mm; }
+    /* Make sure the app background doesn't leak into print */
+    html, body { background: white !important; }
+  }
 
-/* Optional: font (Inter) if you want it; comment out if not needed */
+
 

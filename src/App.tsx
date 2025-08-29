@@ -9,6 +9,10 @@ import { useState } from "react";
 import { FullScreenPicker } from "./components/FullScreenPicker";
 import { INTERVENTIONS, OBSERVATIONS } from "./data/option";
 import type { Option } from "./types/options";
+import { InlineSessionLine } from "./components/InlineSessionLine";
+import { PrintableNote, type NoteData } from "./components/PrintableNote";
+
+
 
 // Utility that converts IDs → labels for display
 function toLabels(ids: string[], src: Option[]) {
@@ -16,19 +20,64 @@ function toLabels(ids: string[], src: Option[]) {
 }
 
 export default function App() {
-  // Multi-select state (IDs)
-  const [interventions, setInterventions] = useState<string[]>([]);
-  const [observations, setObservations] = useState<string[]>([]);
 
-  // Which picker is open? (null = none)
-  const [picker, setPicker] = useState<null | "interventions" | "observations">(null);
+    const [mode, setMode] = useState<"telephone"|"virtual"|"in-person">("telephone");
+    const [duration, setDuration] = useState<30|60|90>(90);
+    const [clientUpdate, setClientUpdate] = useState("");
+    const [themes, setThemes] = useState("");
 
-  // Simple controlled date string (yyyy-mm-dd)
-  const [nextDate, setNextDate] = useState("");
+    // Multi-select state (IDs)
+    const [interventions, setInterventions] = useState<string[]>([]);
+    const [observations, setObservations] = useState<string[]>([]);
+
+    //
+    const [interventionsIds, setInterventionsIds] = useState<string[]>([]);
+    const [observationsIds, setObservationsIds] = useState<string[]>([]);
+
+    // Which picker is open? (null = none)
+    const [picker, setPicker] = useState<null | "interventions" | "observations">(null);
+
+    //emotional regulation state
+    
+    const [plan, setPlan] = useState("emotional regulation");
+    // Simple controlled date string (yyyy-mm-dd)
+    const [nextDate, setNextDate] = useState("");
+
+
+  // Build the data object for the print component
+  const noteData: NoteData = {
+    mode,
+    durationMinutes: duration,
+    clientUpdate,
+    themes,
+    interventions: toLabels(interventionsIds, INTERVENTIONS),
+    observations: toLabels(observationsIds, OBSERVATIONS),
+    plan,
+    nextSessionISO: nextDate,
+  };
+
+  const handlePrint = () => {
+    // Show system dialog -> choose “Save as PDF”
+    window.print();
+  };
+
 
   return (
     <div className="min-h-screen bg-dark-1 text-white font-inter p-6 space-y-6">
       <h1 className="text-3xl font-bold">Note Taking App</h1>
+
+
+      <div className="print:hidden p-6 space-y-6">
+
+        {/* session info (dropdowns) */}
+        <div className=" bg-dark-1 text-white font-inter  space-y-6">
+        <section className="rounded-2xl border border-dark-3 bg-dark-2 p-4">
+            <InlineSessionLine />
+        </section>
+        </div>
+
+
+
 
       {/* Client update (free text) */}
       <section className="rounded-2xl border border-dark-3 bg-dark-2 p-4">
@@ -142,6 +191,28 @@ export default function App() {
           }}
         />
       )}
+
+        
+        </div>
+       
+
+
+
+        {/* Your selectors for interventions/observations should set interventionsIds/observationsIds */}
+        {/* ... */}
+
+        <div className="pt-2">
+          <button
+            onClick={handlePrint}
+            className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-dark-1 hover:bg-light-1"
+          >
+            Print / Save PDF
+          </button>
+        </div>
+
+
+      {/* PRINT-ONLY AREA (renders the formatted note) */}
+      <PrintableNote data={noteData} />
     </div>
   );
 }

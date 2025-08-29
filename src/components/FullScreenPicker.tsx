@@ -153,8 +153,9 @@ export function FullScreenPicker({ title, options, selected, onSave, onClose }: 
                             "focus-visible:outline focus-visible:outline-2 focus-visible:outline-black"
                           )}
                           // Optional data attribute if you want to style [data-selected=true] in CSS
+                          //below is button text controls
                           data-selected={active || undefined}
-                        >
+                        >         
                           <div className="text-sm font-medium">{opt.label}</div>
                           {opt.description && (
                             <div className="mt-0.5 text-xs text-gray-500">
