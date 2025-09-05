@@ -1,5 +1,5 @@
 
-import type { Option } from "../types/options";
+//import type { Option } from "../types/options";
 
 /**
  * Data shape we expect from the main form.
