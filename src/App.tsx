@@ -1,63 +1,57 @@
-/**
- * App.tsx
- * - Main form (client update, themes, interventions, observations, next date)
- * - Clicking “Interventions” or “Observations” opens a full-screen selector
- * - Supports copy-to-clipboard (rich HTML) and print-to-PDF
- */
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FullScreenPicker } from "./components/FullScreenPicker";
-import { mergedOptions } from "./utils/optionStore";
-import { toLabels } from "./utils/toLabels";
-import { INTERVENTIONS, OBSERVATIONS } from "./data/option"; // ← plural
-import type { Option } from "./types/options";
+import { usePromptLibrary } from "./hooks/usePromptLibrary";
+import { useNoteDraft } from "./hooks/useNoteDraft";
+import { resolveSelectedLabels } from "./utils/resolveSelections";
 import { InlineSessionLine } from "./components/InlineSessionLine";
 import { PrintableNote, type NoteData } from "./components/PrintableNote";
 import { copyNoteToClipboard } from "./utils/clipboard";
 import { buildNoteHTML } from "./utils/noteFormat"; // for preview
+import { exportPromptLibrary, importPromptLibrary } from "./utils/promptLibraryBackup";
 
 export default function App() {
-  // Session info shown inline (your InlineSessionLine may own its own state;
-  // these are placeholders—wire them up if you want the line to drive these)
-  const [mode] = useState<"telephone" | "virtual" | "in-person">("telephone");
-  const [duration] = useState<30 | 60 | 90>(90);
+  const { library, updateItem, reloadFromStorage } = usePromptLibrary();
+  const {
+    note,
+    setFreeText,
+    setMeta,
+    toggleSelection,
+    setSelection,
+    moveSelection,
+    cleanDeletedSelections
+  } = useNoteDraft();
 
-  // Free text fields
-  const [clientUpdate, setClientUpdate] = useState("");
-  const [themes, setThemes] = useState("");
-  const [plans, setPlans] = useState("Writer will continue to support the client in ");
+  // Cleanup dangling selections on mount or library change
+  useEffect(() => {
+    const interventionIds = library.sections.interventions?.items.map(i => i.id) || [];
+    const observationIds = library.sections.observations?.items.map(i => i.id) || [];
+    cleanDeletedSelections("interventions", interventionIds);
+    cleanDeletedSelections("observations", observationIds);
+  }, [library, cleanDeletedSelections]);
 
-  // Multi-select IDs
-  const [interventionsIds, setInterventions] = useState<string[]>([]);
-  const [observationsIds, setObservations] = useState<string[]>([]);
-
-  // Which picker is open?
   const [picker, setPicker] = useState<null | "interventions" | "observations">(null);
+  const [showPreview, setShowPreview] = useState(false);
 
-  // Merge base + custom options for display/print/copy
-  const obsAll: Option[] = mergedOptions(OBSERVATIONS, "observations");
-  const intAll: Option[] = mergedOptions(INTERVENTIONS, "interventions");
+  // Destructure for easy access
+  const { mode, durationMinutes, nextSessionISO } = note.meta;
+  const { clientUpdate, themes, plan } = note.freeText;
+  const interventionsIds = note.selections.interventions || [];
+  const observationsIds = note.selections.observations || [];
 
-  const obsLabels = toLabels(observationsIds, obsAll);
-  const intLabels = toLabels(interventionsIds, intAll);
+  // Build resolved arrays
+  const interventionsLabels = resolveSelectedLabels("interventions", interventionsIds, library);
+  const observationsLabels = resolveSelectedLabels("observations", observationsIds, library);
 
-  // Date
-  const [nextDate, setNextDate] = useState(""); // yyyy-mm-dd
-
-  // Build data for printing/copying — use merged lists so custom items resolve
   const noteData: NoteData = {
     mode,
-    durationMinutes: duration,
+    durationMinutes,
     clientUpdate,
     themes,
-    interventions: toLabels(interventionsIds, intAll),
-    observations: toLabels(observationsIds, obsAll),
-    plan: plans, // ← use the textarea value
-    nextSessionISO: nextDate,
+    interventions: interventionsLabels,
+    observations: observationsLabels,
+    plan,
+    nextSessionISO,
   };
-
-  // Clipboard & preview
-  const [showPreview, setShowPreview] = useState(false);
 
   async function handleCopy() {
     try {
@@ -74,105 +68,145 @@ export default function App() {
     window.print();
   };
 
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>, mode: "merge" | "replace") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (mode === "replace") {
+      if (!window.confirm("WARNING: This will overwrite your entire prompt library. Proceed?")) {
+        e.target.value = '';
+        return;
+      }
+    }
+
+    try {
+      const summary = await importPromptLibrary(file, mode);
+      reloadFromStorage();
+      alert(`Import successful (${summary.mode})!\n\nInterventions: +${summary.interventions.added}, ~${summary.interventions.updated}, =${summary.interventions.kept}\nObservations: +${summary.observations.added}, ~${summary.observations.updated}, =${summary.observations.kept}`);
+    } catch (err: any) {
+      alert(err.message || "Failed to import prompts.");
+    } finally {
+      e.target.value = ''; // reset input
+    }
+  };
+
+  function renderChips(section: "interventions" | "observations") {
+    const ids = section === "interventions" ? interventionsIds : observationsIds;
+    if (ids.length === 0) {
+      return <div className="text-light-4 mt-2 font-normal">Click to select {section}</div>;
+    }
+
+    return (
+      <div className="flex flex-col gap-2 mt-2 w-full font-normal">
+        {ids.map((id, index) => {
+          const label = resolveSelectedLabels(section, [id], library)[0] || `[Unknown: ${id}]`;
+          return (
+            <div key={id} className="group relative flex items-center justify-between rounded-xl bg-dark-3 px-3 py-2 text-sm w-full transition hover:bg-dark-4">
+              <span className="flex-1 pr-4">{label}</span>
+              <div className="hidden group-hover:flex items-center gap-1 opacity-80 pl-2 border-l border-white/10">
+                <button
+                  onClick={(e) => { e.stopPropagation(); moveSelection(section, index, "up"); }}
+                  className="p-1 hover:text-white hover:bg-black/20 rounded h-7 w-7 flex items-center justify-center cursor-pointer" title="Move up"
+                >↑</button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); moveSelection(section, index, "down"); }}
+                  className="p-1 hover:text-white hover:bg-black/20 rounded h-7 w-7 flex items-center justify-center cursor-pointer" title="Move down"
+                >↓</button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const newLabel = window.prompt("Edit label:", label);
+                    if (newLabel && newLabel.trim()) updateItem(section, id, { label: newLabel.trim() });
+                  }}
+                  className="p-1 hover:text-white hover:bg-black/20 rounded h-7 w-7 flex items-center justify-center cursor-pointer" title="Edit text"
+                >✎</button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleSelection(section, id); }}
+                  className="p-1 hover:text-red-400 hover:bg-black/20 rounded h-7 w-7 flex items-center justify-center text-red-500 cursor-pointer" title="Remove"
+                >✕</button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-dark-1 text-white font-inter p-6 space-y-6">
+    <div className="min-h-screen bg-dark-1 text-white font-inter p-6 space-y-6 text-left">
       <h1 className="text-3xl font-bold">Note Taking App</h1>
 
-      {/* All interactive UI is hidden in print */}
       <div className="print:hidden space-y-6">
-        {/* Session info (Inline line with dropdowns) */}
         <section className="rounded-2xl border border-dark-3 bg-dark-2 p-4">
-          <InlineSessionLine />
+          <InlineSessionLine
+            mode={mode}
+            duration={durationMinutes}
+            onModeChange={(m) => setMeta({ mode: m })}
+            onDurationChange={(d) => setMeta({ durationMinutes: d })}
+          />
         </section>
 
-        {/* Client update */}
         <section className="rounded-2xl border border-dark-3 bg-dark-2 p-4">
           <div className="mb-2 text-sm font-semibold text-light-3">Client update</div>
           <textarea
             value={clientUpdate}
-            onChange={(e) => setClientUpdate(e.target.value)}
-            className="w-full rounded-xl border border-dark-4 bg-dark-1 p-3 text-sm outline-none"
+            onChange={(e) => setFreeText("clientUpdate", e.target.value)}
+            className="w-full rounded-xl border border-dark-4 bg-dark-1 p-3 text-sm outline-none resize-y"
             rows={4}
             placeholder="Type the update…"
           />
         </section>
 
-        {/* Themes */}
         <section className="rounded-2xl border border-dark-3 bg-dark-2 p-4">
           <div className="mb-2 text-sm font-semibold text-light-3">Significant themes</div>
           <textarea
             value={themes}
-            onChange={(e) => setThemes(e.target.value)}
-            className="w-full rounded-xl border border-dark-4 bg-dark-1 p-3 text-sm outline-none"
+            onChange={(e) => setFreeText("themes", e.target.value)}
+            className="w-full rounded-xl border border-dark-4 bg-dark-1 p-3 text-sm outline-none resize-y"
             rows={4}
             placeholder="Type the themes…"
           />
         </section>
 
-        {/* Interventions picker trigger */}
         <section
-          className="rounded-2xl border border-dark-3 bg-dark-2 p-4 cursor-pointer hover:border-light-4"
+          className="rounded-2xl border border-dark-3 bg-dark-2 p-4 cursor-pointer hover:border-light-4 transition-colors"
           onClick={() => setPicker("interventions")}
           title="Click to pick interventions"
         >
-          <div className="mb-2 text-sm font-semibold text-light-3">Interventions included</div>
-          {intLabels.length ? (
-            <div className="flex flex-wrap gap-2">
-              {intLabels.map((l) => (
-                <span key={l} className="rounded-full bg-dark-3 px-3 py-1 text-sm">
-                  {l}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <div className="text-light-4">Click to select interventions</div>
-          )}
+          <div className="text-sm font-semibold text-light-3">Interventions included</div>
+          {renderChips("interventions")}
         </section>
 
-        {/* Observations picker trigger */}
         <section
-          className="rounded-2xl border border-dark-3 bg-dark-2 p-4 cursor-pointer hover:border-light-4"
+          className="rounded-2xl border border-dark-3 bg-dark-2 p-4 cursor-pointer hover:border-light-4 transition-colors"
           onClick={() => setPicker("observations")}
           title="Click to pick observations"
         >
-          <div className="mb-2 text-sm font-semibold text-light-3">Observations / Client response</div>
-          {obsLabels.length ? (
-            <div className="flex flex-wrap gap-2">
-              {obsLabels.map((l) => (
-                <span key={l} className="rounded-full bg-dark-3 px-3 py-1 text-sm">
-                  {l}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <div className="text-light-4">Click to select observations</div>
-          )}
+          <div className="text-sm font-semibold text-light-3">Observations / Client response</div>
+          {renderChips("observations")}
         </section>
 
-        {/* Plan */}
         <section className="rounded-2xl border border-dark-3 bg-dark-2 p-4">
           <div className="mb-2 text-sm font-semibold text-light-3">Plan</div>
           <textarea
-            value={plans}
-            onChange={(e) => setPlans(e.target.value)}
-            className="w-full rounded-xl border border-dark-4 bg-dark-1 p-3 text-sm outline-none"
+            value={plan}
+            onChange={(e) => setFreeText("plan", e.target.value)}
+            className="w-full rounded-xl border border-dark-4 bg-dark-1 p-3 text-sm outline-none resize-y"
             rows={4}
             placeholder="Writer will continue to support the client in…"
           />
         </section>
 
-        {/* Next session date */}
         <section className="rounded-2xl border border-dark-3 bg-dark-2 p-4">
           <div className="mb-2 text-sm font-semibold text-light-3">Next session date</div>
           <input
             type="date"
-            value={nextDate}
-            onChange={(e) => setNextDate(e.target.value)}
-            className="rounded-xl border border-dark-4 bg-dark-1 p-2 text-sm outline-none"
+            value={nextSessionISO || ""}
+            onChange={(e) => setMeta({ nextSessionISO: e.target.value })}
+            className="rounded-xl border border-dark-4 bg-dark-1 p-2 text-sm outline-none cursor-pointer"
           />
         </section>
 
-        {/* Actions */}
         <div className="flex gap-2">
           <button
             onClick={handleCopy}
@@ -196,30 +230,63 @@ export default function App() {
           </button>
         </div>
 
-        {/* Copyable preview (uses same HTML as clipboard) */}
         {showPreview && (
-          <div className="rounded-2xl bg-white p-6 text-black shadow-sm">
+          <div className="rounded-2xl bg-white p-6 text-black shadow-sm text-left">
             <div dangerouslySetInnerHTML={{ __html: buildNoteHTML(noteData) }} />
             <div className="mt-3 text-xs text-gray-600">
               Tip: Select all (Ctrl/⌘+A) then copy — formatting is preserved in Word.
             </div>
           </div>
         )}
+
+        {/* Prompt Library Backup UI */}
+        <section className="rounded-2xl border border-dark-3 bg-dark-2 p-4 mt-8">
+          <div className="mb-4 text-sm font-semibold text-light-3">Prompts Backup & Transfer</div>
+          <div className="flex flex-wrap gap-2 items-center">
+            <button
+              onClick={exportPromptLibrary}
+              className="rounded-xl border border-light-3 px-4 py-2 text-sm hover:bg-dark-3 transition-colors"
+            >
+              Export Prompts (JSON)
+            </button>
+            <div className="h-4 w-px bg-dark-4 mx-2 hidden sm:block"></div>
+
+            <label className="rounded-xl border border-blue-500/50 text-blue-300 px-4 py-2 text-sm hover:bg-blue-500/10 transition-colors cursor-pointer">
+              Import Prompts (Merge)
+              <input
+                type="file"
+                accept="application/json"
+                className="hidden"
+                onChange={(e) => handleImport(e, "merge")}
+              />
+            </label>
+
+            <label className="rounded-xl border border-red-500/50 text-red-300 px-4 py-2 text-sm hover:bg-red-500/10 transition-colors cursor-pointer">
+              Import Prompts (Replace)
+              <input
+                type="file"
+                accept="application/json"
+                className="hidden"
+                onChange={(e) => handleImport(e, "replace")}
+              />
+            </label>
+          </div>
+          <div className="mt-3 text-xs text-gray-400">
+            Exported backups contain your prompt configuration only. No patient data is included.
+          </div>
+        </section>
       </div>
 
-      {/* PRINT-ONLY AREA (renders the formatted note) */}
       <PrintableNote data={noteData} />
 
-      {/* Full-screen pickers (modal overlays) */}
       {picker === "interventions" && (
         <FullScreenPicker
           title="Pick interventions"
-          options={INTERVENTIONS}
+          section="interventions"
           selected={interventionsIds}
-          storageKey="interventions" // ← important for custom option persistence
           onClose={() => setPicker(null)}
           onSave={(ids) => {
-            setInterventions(ids);
+            setSelection("interventions", ids);
             setPicker(null);
           }}
         />
@@ -228,12 +295,11 @@ export default function App() {
       {picker === "observations" && (
         <FullScreenPicker
           title="Pick observations"
-          options={OBSERVATIONS}
+          section="observations"
           selected={observationsIds}
-          storageKey="observations" // ← important for custom option persistence
           onClose={() => setPicker(null)}
           onSave={(ids) => {
-            setObservations(ids);
+            setSelection("observations", ids);
             setPicker(null);
           }}
         />

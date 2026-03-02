@@ -1,58 +1,171 @@
-/**
- * FullScreenPicker (card-select + creatable via search)
- * - Click ANYWHERE on a card to toggle selection
- * - "Add" button next to search adds the typed query as a new option
- * - New options persist via localStorage and are auto-selected
- */
-
 import { useEffect, useMemo, useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
-import { useLocalStorage } from "../hooks/useLocalStorage";
-import type { Option } from "../types/options";
+import { usePromptLibrary } from "../hooks/usePromptLibrary";
+import type { PromptSectionKey, PromptItem } from "../../dataDictionary";
 
-// tiny className joiner
 const cx = (...p: Array<string | false | null | undefined>) => p.filter(Boolean).join(" ");
-
-// create a slug id from a label
-function slugify(label: string) {
-  return label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-}
 
 type Props = {
   title: string;
-  options: Option[];
+  section: PromptSectionKey;
   selected: string[];
   onSave: (ids: string[]) => void;
   onClose: () => void;
-  /** storage namespace for custom options (e.g., "observations", "interventions") */
-  storageKey?: string;
 };
+
+function SortablePickerItem({
+  opt, active, editingId, editValue, setEditValue, handleEditSave, setEditingId,
+  toggle, moveItem, section, handleEditStart, handleDelete, isSearchActive
+}: {
+  opt: PromptItem;
+  active: boolean;
+  editingId: string | null;
+  editValue: string;
+  setEditValue: (v: string) => void;
+  handleEditSave: () => void;
+  setEditingId: (id: string | null) => void;
+  toggle: (id: string) => void;
+  moveItem: (s: PromptSectionKey, id: string, dir: "up" | "down", wg?: boolean) => void;
+  section: PromptSectionKey;
+  handleEditStart: (opt: PromptItem) => void;
+  handleDelete: (id: string) => void;
+  isSearchActive: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: opt.id, disabled: isSearchActive });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : 1,
+  };
+
+  return (
+    <li ref={setNodeRef} style={style} className={cx("relative group text-left", isDragging && "shadow-xl rounded-2xl")}>
+      {editingId === opt.id ? (
+        <div className="w-full rounded-2xl border border-blue-500 bg-white px-4 py-3 flex gap-2 items-center">
+          <input
+            autoFocus
+            type="text"
+            className="flex-1 bg-transparent text-sm text-black outline-none"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleEditSave();
+              if (e.key === "Escape") setEditingId(null);
+            }}
+            onBlur={handleEditSave}
+          />
+          <div className="text-xs text-gray-400">Enter to save</div>
+        </div>
+      ) : (
+        <div className={cx(
+          "w-full flex items-stretch justify-between rounded-2xl border transition overflow-hidden text-left",
+          active
+            ? "border-black bg-black text-white"
+            : "border-gray-300 bg-white hover:bg-gray-50 text-black",
+        )}>
+          {!isSearchActive && (
+            <div
+              {...attributes}
+              {...listeners}
+              className="flex items-center pl-3 pr-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+              title="Drag to reorder"
+            >
+              ⋮⋮
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => toggle(opt.id)}
+            aria-pressed={active}
+            className={cx(
+              "flex-1 py-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-black",
+              isSearchActive ? "px-4" : "pr-4 pl-1"
+            )}
+          >
+            <div className="text-sm font-medium">{opt.label}</div>
+            {opt.description && (
+              <div className="mt-0.5 text-xs opacity-70">{opt.description}</div>
+            )}
+          </button>
+          <div className="hidden group-hover:flex items-center space-x-1 pr-3 pl-2">
+            {!isSearchActive && (
+              <>
+                <button onClick={(e) => { e.stopPropagation(); moveItem(section, opt.id, "up", true); }} className="p-1 hover:bg-gray-300/50 rounded flex items-center justify-center w-7 h-7" title="Move up">↑</button>
+                <button onClick={(e) => { e.stopPropagation(); moveItem(section, opt.id, "down", true); }} className="p-1 hover:bg-gray-300/50 rounded flex items-center justify-center w-7 h-7" title="Move down">↓</button>
+              </>
+            )}
+            <button onClick={(e) => { e.stopPropagation(); handleEditStart(opt); }} className="p-1 hover:bg-gray-300/50 rounded flex items-center justify-center w-7 h-7" title="Edit">✎</button>
+            {opt.isCustom && (
+              <button onClick={(e) => { e.stopPropagation(); handleDelete(opt.id); }} className="p-1 hover:bg-gray-300/50 rounded flex items-center justify-center w-7 h-7 text-red-500 hover:text-red-700" title="Delete">✕</button>
+            )}
+          </div>
+        </div>
+      )}
+    </li>
+  );
+}
 
 export function FullScreenPicker({
   title,
-  options,
+  section,
   selected,
   onSave,
   onClose,
-  storageKey,
 }: Props) {
   useLockBodyScroll(true);
 
-  // persistent custom options for this picker
-  const key = `custom-options:${storageKey ?? slugify(title)}`;
-  const [customOpts, setCustomOpts] = useLocalStorage<Option[]>(key, []);
+  const { getItems, addItem, updateItem, deleteItem, moveItem, reorderGroupItems } = usePromptLibrary();
+  const allOptions = getItems(section);
 
-  // combined options
-  const [allOptions, setAllOptions] = useState<Option[]>(() => [...options, ...customOpts]);
-  useEffect(() => setAllOptions([...options, ...customOpts]), [options, customOpts]);
-
-  // selection + search
   const [local, setLocal] = useState<string[]>(selected);
   const [query, setQuery] = useState("");
 
-  // keyboard shortcuts
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  useEffect(() => {
+    const validIds = new Set(allOptions.map(o => o.id));
+    setLocal(prev => prev.filter(id => validIds.has(id)));
+  }, [allOptions]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (editingId) {
+        if (e.key === "Escape") setEditingId(null);
+        return;
+      }
+
       if (e.key === "Escape") onClose();
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
         e.preventDefault();
@@ -61,9 +174,8 @@ export function FullScreenPicker({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose, allOptions]);
+  }, [onClose, allOptions, editingId]);
 
-  // filter options by query
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return allOptions;
@@ -72,9 +184,8 @@ export function FullScreenPicker({
     );
   }, [query, allOptions]);
 
-  // group filtered options
   const byGroup = useMemo(() => {
-    const map = new Map<string, Option[]>();
+    const map = new Map<string, PromptItem[]>();
     for (const opt of filtered) {
       const g = opt.group ?? "Other";
       if (!map.has(g)) map.set(g, []);
@@ -87,39 +198,59 @@ export function FullScreenPicker({
   const toggle = (id: string) =>
     setLocal((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
-  // add a new option from the current query; infer group if all results share one
-  function addFromQuery() {
+  function handleAddFromQuery() {
     const label = query.trim();
     if (!label) return;
 
-    // infer a group if exactly one group is visible in the filtered view
     let group: string | undefined = undefined;
     const uniqueGroups = new Set(filtered.map((o) => o.group ?? "Other"));
     if (uniqueGroups.size === 1) {
       const first = filtered[0];
-      group = first?.group; // may still be undefined -> fine
+      group = first?.group;
     }
 
-    addOption(label, group);
-    setQuery(""); // clear search after adding
+    const newId = addItem(section, label, group);
+    setQuery("");
+    setLocal((prev) => [...prev, newId]);
   }
 
-  function addOption(label: string, group?: string) {
-    const base = slugify(label) || "item";
-    const existing = new Set(allOptions.map((o) => o.id));
-    let id = base;
-    let n = 2;
-    while (existing.has(id)) id = `${base}-${n++}`;
-
-    const opt: Option = { id, label, group };
-    setCustomOpts((prev) => [...prev, opt]);   // persist
-    setAllOptions((prev) => [...prev, opt]);   // local list
-    setLocal((prev) => [...prev, id]);         // auto-select
+  function handleDelete(id: string) {
+    if (window.confirm("Delete this custom prompt?")) {
+      deleteItem(section, id);
+      setLocal(prev => prev.filter(x => x !== id));
+    }
   }
+
+  function handleEditStart(opt: PromptItem) {
+    setEditingId(opt.id);
+    setEditValue(opt.label);
+  }
+
+  function handleEditSave() {
+    if (!editingId) return;
+    const val = editValue.trim();
+    if (val) {
+      updateItem(section, editingId, { label: val });
+    }
+    setEditingId(null);
+  }
+
+  function handleDragEnd(event: DragEndEvent, groupItems: PromptItem[]) {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const groupIds = groupItems.map(i => i.id);
+      const oldIndex = groupIds.indexOf(active.id as string);
+      const newIndex = groupIds.indexOf(over.id as string);
+
+      const newOrderIds = arrayMove(groupIds, oldIndex, newIndex);
+      reorderGroupItems(section, newOrderIds);
+    }
+  }
+
+  const isSearchActive = query.trim().length > 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black/90 text-white">
-      {/* Header / Actions */}
+    <div className="fixed inset-0 z-50 flex flex-col bg-black/90 text-white text-left">
       <div className="sticky top-0 border-b border-white/10 bg-black/90 backdrop-blur">
         <div className="flex max-w-5xl items-center gap-2 px-4 py-3">
           <button
@@ -145,7 +276,6 @@ export function FullScreenPicker({
           </button>
         </div>
 
-        {/* Search + Add */}
         <div className="max-w-5xl px-4 pb-3">
           <div className="flex items-center gap-2">
             <input
@@ -155,7 +285,7 @@ export function FullScreenPicker({
               className="flex-1 rounded-2xl border border-white/20 bg-white/95 px-4 py-2.5 text-sm text-black outline-none placeholder:text-gray-500 focus:border-gray-400"
             />
             <button
-              onClick={addFromQuery}
+              onClick={handleAddFromQuery}
               disabled={!query.trim()}
               className="rounded-xl border border-white/20 px-3 py-2 text-sm text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white/10"
               title="Add the typed text as a new option"
@@ -167,16 +297,15 @@ export function FullScreenPicker({
         </div>
       </div>
 
-      {/* Content */}
       <div className="w-full max-w-5xl flex-1 overflow-auto px-4 py-6 bg-white text-black">
-        <div className="space-y-8">
+        <div className="space-y-8 text-left">
           {byGroup.map(([group, items]) => {
             const groupIds = items.map((i) => i.id);
             const everySelected = groupIds.every((id) => local.includes(id));
             return (
-              <div key={group}>
-                <div className="mb-2 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-gray-800">{group}</h3>
+              <div key={group} className="text-left">
+                <div className="mb-2 flex items-center justify-between text-left">
+                  <h3 className="text-sm font-semibold text-gray-800 text-left">{group}</h3>
                   <button
                     onClick={() =>
                       setLocal((prev) =>
@@ -191,34 +320,34 @@ export function FullScreenPicker({
                   </button>
                 </div>
 
-                {/* 1 col on mobile, 2 cols on sm+ */}
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {items.map((opt) => {
-                    const active = isSelected(opt.id);
-                    return (
-                      <li key={opt.id}>
-                        <button
-                          type="button"
-                          onClick={() => toggle(opt.id)}
-                          aria-pressed={active}
-                          className={cx(
-                            "w-full select-none rounded-2xl border px-4 py-3 text-left transition",
-                            active
-                              ? "border-black bg-black text-white"
-                              : "border-gray-300 bg-white hover:bg-gray-50 text-black",
-                            "focus-visible:outline focus-visible:outline-2 focus-visible:outline-black"
-                          )}
-                          data-selected={active || undefined}
-                        >
-                          <div className="text-sm font-medium">{opt.label}</div>
-                          {opt.description && (
-                            <div className="mt-0.5 text-xs text-gray-500">{opt.description}</div>
-                          )}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={(e) => handleDragEnd(e, items)}
+                >
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
+                    <SortableContext items={groupIds} strategy={rectSortingStrategy}>
+                      {items.map((opt) => (
+                        <SortablePickerItem
+                          key={opt.id}
+                          opt={opt}
+                          active={isSelected(opt.id)}
+                          editingId={editingId}
+                          editValue={editValue}
+                          setEditValue={setEditValue}
+                          handleEditSave={handleEditSave}
+                          setEditingId={setEditingId}
+                          toggle={toggle}
+                          moveItem={moveItem}
+                          section={section}
+                          handleEditStart={handleEditStart}
+                          handleDelete={handleDelete}
+                          isSearchActive={isSearchActive}
+                        />
+                      ))}
+                    </SortableContext>
+                  </ul>
+                </DndContext>
               </div>
             );
           })}
