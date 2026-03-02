@@ -31,6 +31,7 @@ export function loadNoteTemplate(): NoteTemplate {
 export function saveNoteTemplate(template: NoteTemplate): void {
     try {
         localStorage.setItem(STORAGE_KEYS.noteTemplate, JSON.stringify(template));
+        window.dispatchEvent(new Event('appDataChanged'));
     } catch (err) {
         console.warn("Failed to save NoteTemplate to localStorage.", err);
     }

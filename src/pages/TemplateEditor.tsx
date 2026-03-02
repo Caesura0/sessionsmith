@@ -103,17 +103,20 @@ function SortableFieldItem({
                 >
                     <Edit3 className="w-4 h-4" />
                 </button>
-                <button
-                    onClick={() => {
-                        if (window.confirm(`Are you sure you want to remove "${field.label}"? Your notes will no longer show this section.`)) {
-                            onRemove(field.id);
-                        }
-                    }}
-                    className="p-1.5 hover:text-red-400 hover:bg-red-500/20 rounded-lg text-red-500 transition-colors cursor-pointer"
-                    title="Remove Section"
-                >
-                    <Trash2 className="w-4 h-4" />
-                </button>
+                {/* Prevent deletion of core default fields */}
+                {!['clientUpdate', 'themes', 'plan', 'interventions', 'observations'].includes(field.id) && (
+                    <button
+                        onClick={() => {
+                            if (window.confirm(`Are you sure you want to remove "${field.label}"? Your notes will no longer show this section.`)) {
+                                onRemove(field.id);
+                            }
+                        }}
+                        className="p-1.5 hover:text-red-400 hover:bg-red-500/20 rounded-lg text-red-500 transition-colors cursor-pointer"
+                        title="Remove Section"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                )}
             </div>
         </div>
     );

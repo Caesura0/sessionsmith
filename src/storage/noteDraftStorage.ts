@@ -19,6 +19,7 @@ export function loadNoteDraft(): NoteDraft {
 export function saveNoteDraft(draft: NoteDraft) {
     try {
         localStorage.setItem(STORAGE_KEYS.noteDraft, JSON.stringify(draft));
+        window.dispatchEvent(new Event('appDataChanged'));
     } catch (e) {
         console.error("Failed to save note draft", e);
     }

@@ -146,8 +146,8 @@ export function createEmptyNoteDraft(): NoteDraft {
             observations: [],
         },
         freeText: {
-            clientUpdate: "",
-            themes: "",
+            clientUpdate: "Client reports ",
+            themes: "Client presented as ",
             plan: "Writer will continue to support the client in ",
         },
         meta: {

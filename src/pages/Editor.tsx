@@ -5,6 +5,7 @@ import { usePromptLibrary } from "../hooks/usePromptLibrary";
 import { useNoteDraft } from "../hooks/useNoteDraft";
 import { useNoteTemplate } from "../hooks/useNoteTemplate";
 import { resolveSelectedLabels } from "../utils/resolveSelections";
+import { createEmptyNoteDraft } from "../../dataDictionary";
 import { InlineSessionLine } from "../components/InlineSessionLine";
 import { PrintableNote, type NoteData } from "../components/PrintableNote";
 import { copyNoteToClipboard } from "../utils/clipboard";
@@ -76,6 +77,24 @@ export function Editor() {
         window.print();
     };
 
+    const handleClearAll = () => {
+        if (window.confirm("WARNING: This will permanently delete your entire drafted session note. Are you completely sure you want to clear the form?")) {
+            // Reset Meta (leaving mode alone is usually fine, but resetting duration/next session is good)
+            setMeta({ durationMinutes: 60, nextSessionISO: undefined });
+
+            // Clear all fields based on template
+            for (const field of template.fields) {
+                if (field.type === "freetext") {
+                    const empty = createEmptyNoteDraft().freeText;
+                    // Provide the default string if it exists in the empty draft, else empty string
+                    setFreeText(field.id, empty[field.id as keyof typeof empty] || "");
+                } else if (field.type === "prompt-list") {
+                    setSelection(field.id, []);
+                }
+            }
+        }
+    };
+
     function renderChips(sectionId: string, label: string) {
         const ids = note.selections[sectionId] || [];
         if (ids.length === 0) {
@@ -122,7 +141,7 @@ export function Editor() {
         <div className="space-y-6 max-w-3xl pb-24 text-left mx-auto">
             <header className="mb-8 flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Note Editor</h1>
+                    <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Session Notes</h1>
                     <p className="text-light-4">Draft your session note. Changes are saved locally.</p>
                 </div>
                 <div className="flex items-center gap-2 print:hidden backdrop-blur-md bg-dark-2/80 rounded-2xl p-1.5 border border-white/5 shadow-lg">
@@ -206,6 +225,15 @@ export function Editor() {
                         className="rounded-xl border border-dark-4 bg-dark-1 px-4 py-2 text-sm font-medium text-white outline-none cursor-pointer focus:border-accent-blue focus:ring-1 focus:ring-accent-blue"
                     />
                 </section>
+
+                <div className="pt-8 flex justify-center border-t border-dark-3/50 mt-12">
+                    <button
+                        onClick={handleClearAll}
+                        className="rounded-xl flex items-center justify-center gap-2 bg-red-500/10 border border-red-500/20 px-6 py-3 text-sm font-medium text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none"
+                    >
+                        <Trash2 className="w-4 h-4" /> Clear Entire Form
+                    </button>
+                </div>
 
                 {showPreview && (
                     <div className="rounded-2xl bg-white p-6 shadow-xl text-left border border-white/10 animate-in fade-in slide-in-from-top-4 duration-300">

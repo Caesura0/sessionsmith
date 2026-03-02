@@ -70,7 +70,6 @@ export function loadPromptLibrary(): PromptLibrary {
                     version: 1,
                     sections: finalSections
                 };
-                savePromptLibrary(finalLibrary);
                 return finalLibrary;
             }
         }
@@ -92,13 +91,13 @@ export function loadPromptLibrary(): PromptLibrary {
             }
         }
     };
-    savePromptLibrary(initialLibrary);
     return initialLibrary;
 }
 
 export function savePromptLibrary(library: PromptLibrary) {
     try {
         localStorage.setItem(STORAGE_KEYS.promptLibrary, JSON.stringify(library));
+        window.dispatchEvent(new Event('appDataChanged'));
     } catch (e) {
         console.error("Failed to save prompt library", e);
     }

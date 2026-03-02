@@ -1,13 +1,15 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { CopyPlus, Settings, Home as HomeIcon, LayoutTemplate } from "lucide-react";
+import { CopyPlus, Settings, Home as HomeIcon, LayoutTemplate, LogOut } from "lucide-react";
 import { cn } from "../../utils/cn";
+import { useAuth } from "../../context/AuthContext";
 
 export function Layout() {
     const location = useLocation();
+    const { logout } = useAuth();
 
     const primaryLinks = [
         { name: "Home", href: "/", icon: HomeIcon },
-        { name: "Editor", href: "/editor", icon: CopyPlus },
+        { name: "Session Notes", href: "/editor", icon: CopyPlus },
     ];
 
     const configLinks = [
@@ -54,6 +56,17 @@ export function Layout() {
                 <div className="p-3 border-t border-dark-3 w-full flex flex-col gap-2">
                     <div className="hidden sm:block text-xs font-semibold text-dark-5 uppercase tracking-wider px-3 mb-1">Configuration</div>
                     {configLinks.map((link) => <NavLink key={link.href} link={link} />)}
+                </div>
+
+                <div className="p-3 border-t border-dark-3 w-full mt-auto">
+                    <button
+                        onClick={logout}
+                        title="Sign Out"
+                        className="w-full flex items-center justify-center sm:justify-start px-3 py-3 rounded-xl transition-all duration-200 group cursor-pointer text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
+                    >
+                        <LogOut className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+                        <span className="ml-3 hidden sm:block whitespace-nowrap font-medium">Sign Out</span>
+                    </button>
                 </div>
             </aside>
 
