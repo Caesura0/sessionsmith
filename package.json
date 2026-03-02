@@ -14,8 +14,12 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@tailwindcss/vite": "^4.1.12",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.576.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-router-dom": "^7.13.1",
+    "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.1.12"
   },
   "devDependencies": {

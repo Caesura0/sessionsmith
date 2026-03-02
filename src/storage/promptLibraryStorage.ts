@@ -53,19 +53,22 @@ export function loadPromptLibrary(): PromptLibrary {
         if (raw) {
             const parsed = JSON.parse(raw) as PromptLibrary;
             if (parsed && parsed.version === 1) {
-                // Merge defaults on load in case defaults were updated
+                // Ensure default sections exist and are seeded properly
+                const finalSections = { ...parsed.sections };
+
+                if (!finalSections.interventions) {
+                    finalSections.interventions = { section: "interventions", items: [] };
+                }
+                finalSections.interventions.items = seedSection(DEFAULT_INTERVENTIONS, finalSections.interventions.items);
+
+                if (!finalSections.observations) {
+                    finalSections.observations = { section: "observations", items: [] };
+                }
+                finalSections.observations.items = seedSection(DEFAULT_OBSERVATIONS, finalSections.observations.items);
+
                 const finalLibrary: PromptLibrary = {
                     version: 1,
-                    sections: {
-                        interventions: {
-                            section: "interventions",
-                            items: seedSection(DEFAULT_INTERVENTIONS, parsed.sections.interventions?.items || []),
-                        },
-                        observations: {
-                            section: "observations",
-                            items: seedSection(DEFAULT_OBSERVATIONS, parsed.sections.observations?.items || []),
-                        }
-                    }
+                    sections: finalSections
                 };
                 savePromptLibrary(finalLibrary);
                 return finalLibrary;

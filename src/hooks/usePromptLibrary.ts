@@ -23,7 +23,9 @@ export function usePromptLibrary() {
         let generatedId = baseObj;
 
         setLibrary(prev => {
-            const items = prev.sections[section]?.items || [];
+            const sectionData = prev.sections[section] || { section, items: [] };
+            const items = sectionData.items || [];
+
             let id = baseObj;
             let n = 2;
             const existingIds = new Set(items.map(i => i.id));

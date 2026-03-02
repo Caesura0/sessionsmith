@@ -8,21 +8,55 @@
  *  - bg-dark-1 text-light-1 border-dark-3 etc.
  */
 @theme {
-  --color-dark-1: #09090a;
-  --color-dark-2: #1c1c1e;
-  --color-dark-3: #2a2a2e;
-  --color-dark-4: #3a3a3e;
+  --color-dark-0: #050505;
+  --color-dark-1: #0a0a0c;
+  --color-dark-2: #121214;
+  --color-dark-3: #1c1c1f;
+  --color-dark-4: #27272a;
+  --color-dark-5: #3f3f46;
 
-  --color-light-1: #f9f9f9;
+  --color-light-1: #ffffff;
+  --color-light-2: #f4f4f5;
   --color-light-3: #d4d4d8;
   --color-light-4: #a1a1aa;
+  
+  --color-accent-blue: #3b82f6;
+  --color-accent-blue-hover: #2563eb;
+  --color-accent-purple: #8b5cf6;
+
+  /* Custom Glows */
+  --shadow-glow: 0 0 15px -3px rgba(59, 130, 246, 0.3);
+  --shadow-glow-purple: 0 0 15px -3px rgba(139, 92, 246, 0.3);
 }
-@media print {
-    /* Set nice page margins; adjust to taste */
-    @page { margin: 20mm; }
-    /* Make sure the app background doesn't leak into print */
-    html, body { background: white !important; }
+
+@layer utilities {
+  .glass {
+    background: rgba(28, 28, 31, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
+}
+
+body {
+  background-color: var(--color-dark-1);
+  color: var(--color-light-2);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media print {
+  /* Set nice page margins; adjust to taste */
+  @page { margin: 20mm; }
+  /* Make sure the app background doesn't leak into print */
+  html, body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
 
 
 
