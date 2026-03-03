@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { PenLine, Settings, ArrowRight } from "lucide-react";
-import { usePromptLibrary } from "../hooks/usePromptLibrary";
+import { useNoteTemplate } from "../hooks/useNoteTemplate";
 
 export function Home() {
-    const { library } = usePromptLibrary();
-    const intCount = library?.sections?.interventions?.items?.length || 0;
-    const obsCount = library?.sections?.observations?.items?.length || 0;
+    const { template } = useNoteTemplate();
+    const freeTextCount = template.fields.filter(f => f.type === "freetext").length;
+    const dropDownCount = template.fields.filter(f => f.type === "prompt-list").length;
 
     return (
         <div className="space-y-8 max-w-3xl">
@@ -42,7 +42,7 @@ export function Home() {
                             <Settings className="w-6 h-6" />
                         </div>
                         <h2 className="text-xl font-semibold text-white mb-2 group-hover:text-accent-purple transition-colors">Manage Prompts</h2>
-                        <p className="text-light-4 text-sm mb-6">You have {intCount} interventions and {obsCount} observations configured.</p>
+                        <p className="text-light-4 text-sm mb-6">You have {freeTextCount} free text and {dropDownCount} drop down lists configured.</p>
                         <div className="flex items-center text-sm font-medium text-accent-purple">
                             Open Settings <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                         </div>
