@@ -106,7 +106,7 @@ function SortablePickerItem({
                         )}
                     </button>
                     {!hideControls && (
-                        <div className="hidden group-hover:flex items-center space-x-1 pr-3 pl-2 border-l border-white/5 bg-dark-2/50 backdrop-blur-sm">
+                        <div className="flex items-center space-x-1 pr-3 pl-2 border-l border-white/5 bg-dark-2/50 backdrop-blur-sm">
                             {!isSearchActive && (
                                 <>
                                     <button onClick={(e) => { e.stopPropagation(); moveItem(section, opt.id, "up", true); }} className="p-1 hover:bg-white/10 hover:text-white rounded flex items-center justify-center w-7 h-7 transition-colors" title="Move up">↑</button>

@@ -41,7 +41,7 @@ export function SortableChip({ id, label, onMoveUp, onMoveDown, onEdit, onRemove
                 <span className="text-light-4 opacity-50 select-none">⋮⋮</span>
                 <span>{label}</span>
             </div>
-            <div className="hidden group-hover:flex items-center gap-1 opacity-80 pl-2 border-l border-white/10">
+            <div className="flex items-center gap-1 opacity-80 pl-2 border-l border-white/10">
                 <button
                     onClick={onMoveUp}
                     className="p-1 hover:text-white hover:bg-black/20 rounded h-7 w-7 flex items-center justify-center cursor-pointer" title="Move up"
