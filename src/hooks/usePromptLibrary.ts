@@ -1,17 +1,32 @@
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import type { PromptLibrary, PromptItem, PromptSectionKey } from "../../dataDictionary";
 import { loadPromptLibrary, savePromptLibrary } from "../storage/promptLibraryStorage";
+
+// Global Store Implementation
+let globalLibrary = loadPromptLibrary();
+const listeners = new Set<() => void>();
+
+function subscribe(listener: () => void) {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+}
+
+function getSnapshot() {
+    return globalLibrary;
+}
+
+function setLibrary(updater: (prev: PromptLibrary) => PromptLibrary) {
+    globalLibrary = updater(globalLibrary);
+    savePromptLibrary(globalLibrary);
+    listeners.forEach(l => l());
+}
 
 function slugify(label: string) {
     return label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
 export function usePromptLibrary() {
-    const [library, setLibrary] = useState<PromptLibrary>(loadPromptLibrary);
-
-    useEffect(() => {
-        savePromptLibrary(library);
-    }, [library]);
+    const library = useSyncExternalStore(subscribe, getSnapshot);
 
     const getItems = useCallback((section: PromptSectionKey): PromptItem[] => {
         const items = library.sections[section]?.items || [];
@@ -234,7 +249,7 @@ export function usePromptLibrary() {
     }, []);
 
     const reloadFromStorage = useCallback(() => {
-        setLibrary(loadPromptLibrary());
+        setLibrary(() => loadPromptLibrary());
     }, []);
 
     return {

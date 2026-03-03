@@ -133,23 +133,13 @@ type PromptListProps = {
 };
 
 export function PromptList({ section, selected, onChange, hideControls }: PromptListProps) {
-    const { getItems, addItem, updateItem, updateItemsGroup, deleteItem, moveItem, reorderGroupItems } = usePromptLibrary();
+    const { getItems, addItem, updateItem, deleteItem, moveItem, reorderGroupItems } = usePromptLibrary();
     const allOptions = getItems(section);
 
     const [local, setLocal] = useState<string[]>(selected);
     const [query, setQuery] = useState("");
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editValue, setEditValue] = useState("");
-    const [groupInput, setGroupInput] = useState<{ isOpen: boolean, value: string }>({ isOpen: false, value: "" });
-
-    function handleGroupSelected() {
-        const val = groupInput.value.trim();
-        if (!val) return;
-        updateItemsGroup(section, local, val);
-        setGroupInput({ isOpen: false, value: "" });
-        setLocal([]);
-        if (onChange) onChange([]);
-    }
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -299,46 +289,7 @@ export function PromptList({ section, selected, onChange, hideControls }: Prompt
                     )}
                 </div>
 
-                {/* Multi-select Action Bar */}
-                {local.length > 0 && !hideControls && (
-                    <div className="sticky top-0 z-20 flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-dark-2 border-b border-dark-3 shadow-lg -mx-1 px-3 mb-4 rounded-xl">
-                        <span className="text-sm font-medium text-accent-blue mb-2 sm:mb-0">
-                            {local.length} Item{local.length === 1 ? '' : 's'} Selected
-                        </span>
-                        <div className="flex flex-wrap gap-2 items-center">
-                            {groupInput.isOpen ? (
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        autoFocus
-                                        value={groupInput.value}
-                                        onChange={e => setGroupInput({ isOpen: true, value: e.target.value })}
-                                        placeholder="Subgroup Name..."
-                                        className="text-xs bg-dark-3 border border-dark-4 text-white px-2 py-1.5 rounded-lg outline-none focus:border-accent-blue w-32"
-                                        onKeyDown={e => {
-                                            if (e.key === 'Enter') handleGroupSelected();
-                                            if (e.key === 'Escape') setGroupInput({ isOpen: false, value: "" });
-                                        }}
-                                    />
-                                    <button onClick={handleGroupSelected} className="text-xs bg-accent-blue hover:bg-accent-blue-hover text-white px-3 py-1.5 rounded-lg transition-colors font-medium shadow-sm">
-                                        Save
-                                    </button>
-                                    <button onClick={() => setGroupInput({ isOpen: false, value: "" })} className="text-xs bg-dark-4 hover:bg-dark-5 text-light-3 px-2 py-1.5 rounded-lg transition-colors">
-                                        Cancel
-                                    </button>
-                                </div>
-                            ) : (
-                                <>
-                                    <button onClick={() => setGroupInput({ isOpen: true, value: "" })} className="text-xs bg-accent-blue hover:bg-accent-blue-hover text-white px-3 py-1.5 rounded-lg transition-colors font-medium shadow-sm">
-                                        Add to Subgroup
-                                    </button>
-                                    <button onClick={() => { setLocal([]); if (onChange) onChange([]); }} className="text-xs bg-dark-4 hover:bg-dark-5 text-light-3 px-3 py-1.5 rounded-lg transition-colors">
-                                        Clear
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                )}
+                {/* Multi-select Action Bar moved to parent */}
             </div>
 
             {/* List Segment */}
