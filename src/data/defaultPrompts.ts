@@ -12,9 +12,9 @@ export const DEFAULT_MODES: DefaultPrompt[] = [
 ];
 
 export const DEFAULT_DURATIONS: DefaultPrompt[] = [
-    { id: "dur-30", label: "30" },
-    { id: "dur-45", label: "45" },
     { id: "dur-60", label: "60" },
+    { id: "dur-45", label: "45" },
+    { id: "dur-30", label: "30" },
     { id: "dur-90", label: "90" },
 ];
 
