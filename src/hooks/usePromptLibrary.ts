@@ -63,6 +63,36 @@ export function usePromptLibrary() {
         return generatedId;
     }, []);
 
+    const updateItemsGroup = useCallback((section: PromptSectionKey, ids: string[], groupName: string) => {
+        setLibrary(prev => {
+            const items = prev.sections[section]?.items || [];
+            const now = Date.now();
+            const idSet = new Set(ids);
+
+            const newItems = items.map(item => {
+                if (idSet.has(item.id)) {
+                    return {
+                        ...item,
+                        group: groupName,
+                        updatedAt: now,
+                    };
+                }
+                return item;
+            });
+
+            return {
+                ...prev,
+                sections: {
+                    ...prev.sections,
+                    [section]: {
+                        section,
+                        items: newItems
+                    }
+                }
+            };
+        });
+    }, []);
+
     const updateItem = useCallback((section: PromptSectionKey, id: string, patch: { label?: string, group?: string }) => {
         setLibrary(prev => {
             const items = prev.sections[section]?.items || [];
@@ -212,6 +242,7 @@ export function usePromptLibrary() {
         getItems,
         addItem,
         updateItem,
+        updateItemsGroup,
         deleteItem,
         moveItem,
         reorderGroupItems,

@@ -5,6 +5,8 @@ import { LayoutTemplate, FileText } from "lucide-react";
 import { TemplateEditor } from "./TemplateEditor";
 import { PromptList as PickerList } from "../components/PromptList";
 
+const EMPTY_SELECTION: string[] = [];
+
 export function PromptSetup() {
     const templateManager = useNoteTemplate();
     const { template } = templateManager;
@@ -53,8 +55,9 @@ export function PromptSetup() {
                     <TemplateEditor templateManager={templateManager} />
                 ) : (
                     <PickerList
+                        key={activeTab}
                         section={activeTab}
-                        selected={[]}
+                        selected={EMPTY_SELECTION}
                         onChange={() => { }}
                         hideControls={false}
                     />
