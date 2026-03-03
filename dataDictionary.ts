@@ -70,15 +70,16 @@ export type PromptLibrary = {
  * Note Draft is the user’s current working note.
  * ========================================================================== */
 
-export type SessionMode = "telephone" | "virtual" | "in-person";
+export type SessionMode = string; // E.g., "virtual", "telephone", "in-person"
 
 export type NoteSelections = Record<PromptSectionKey, string[]>;
 export type NoteFreeText = Record<FreeTextSectionKey, string>;
 
 export type NoteMeta = {
     mode: SessionMode;
-    durationMinutes: 30 | 60 | 90;
+    durationMinutes: number; // E.g., 30, 45, 60, 90
     nextSessionISO: string; // yyyy-mm-dd from <input type="date">
+    nextSessionMode?: SessionMode;
 };
 
 export type NoteDraft = {
@@ -109,8 +110,9 @@ export const STORAGE_KEYS = {
 
 export type ResolvedNoteData = {
     mode: SessionMode;
-    durationMinutes: 30 | 60 | 90;
+    durationMinutes: number;
     nextSessionISO: string;
+    nextSessionMode?: SessionMode;
 
     // Dynamic map of field ID -> content
     // For freetext it's the raw string.
@@ -151,9 +153,10 @@ export function createEmptyNoteDraft(): NoteDraft {
             plan: "Writer will continue to support the client in ",
         },
         meta: {
-            mode: "telephone",
-            durationMinutes: 90,
+            mode: "virtual",
+            durationMinutes: 60,
             nextSessionISO: "",
+            nextSessionMode: "virtual",
         },
         updatedAt: Date.now(),
     };

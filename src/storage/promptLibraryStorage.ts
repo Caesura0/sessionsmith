@@ -1,6 +1,6 @@
 import { STORAGE_KEYS } from "../../dataDictionary";
 import type { PromptLibrary, PromptItem } from "../../dataDictionary";
-import { DEFAULT_INTERVENTIONS, DEFAULT_OBSERVATIONS } from "../data/defaultPrompts";
+import { DEFAULT_INTERVENTIONS, DEFAULT_OBSERVATIONS, DEFAULT_MODES, DEFAULT_DURATIONS } from "../data/defaultPrompts";
 import type { DefaultPrompt } from "../data/defaultPrompts";
 
 function seedSection(
@@ -66,6 +66,16 @@ export function loadPromptLibrary(): PromptLibrary {
                 }
                 finalSections.observations.items = seedSection(DEFAULT_OBSERVATIONS, finalSections.observations.items);
 
+                if (!finalSections.sessionMode) {
+                    finalSections.sessionMode = { section: "sessionMode", items: [] };
+                }
+                finalSections.sessionMode.items = seedSection(DEFAULT_MODES, finalSections.sessionMode.items);
+
+                if (!finalSections.sessionDuration) {
+                    finalSections.sessionDuration = { section: "sessionDuration", items: [] };
+                }
+                finalSections.sessionDuration.items = seedSection(DEFAULT_DURATIONS, finalSections.sessionDuration.items);
+
                 const finalLibrary: PromptLibrary = {
                     version: 1,
                     sections: finalSections
@@ -88,6 +98,14 @@ export function loadPromptLibrary(): PromptLibrary {
             observations: {
                 section: "observations",
                 items: seedSection(DEFAULT_OBSERVATIONS, []),
+            },
+            sessionMode: {
+                section: "sessionMode",
+                items: seedSection(DEFAULT_MODES, []),
+            },
+            sessionDuration: {
+                section: "sessionDuration",
+                items: seedSection(DEFAULT_DURATIONS, []),
             }
         }
     };

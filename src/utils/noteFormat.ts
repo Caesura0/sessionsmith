@@ -42,7 +42,7 @@ export function buildNoteHTML(d: NoteData): string {
     ${fieldsHtml}
 
     <p><strong>The next session was booked for:</strong></p>
-    <p>Date of next session - ${esc(dateStr)}</p>
+    <p>Date of next session - ${esc(dateStr)} ${d.nextSessionMode && dateStr !== "Not Documented" ? `(${esc(d.nextSessionMode)})` : ""}</p>
   </div>
 </body></html>`;
 }
@@ -68,7 +68,7 @@ export function buildNotePlainText(d: NoteData): string {
   }
 
   lines.push("The next session was booked for:");
-  lines.push(`Date of next session - ${dateStr}`);
+  lines.push(`Date of next session - ${dateStr} ${d.nextSessionMode && dateStr !== "Not Documented" ? `(${d.nextSessionMode})` : ""}`);
 
   return lines.join("\n");
 }

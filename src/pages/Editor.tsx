@@ -37,7 +37,10 @@ export function Editor() {
     const [picker, setPicker] = useState<null | { id: string; label: string }>(null);
     const [showPreview, setShowPreview] = useState(false);
 
-    const { mode, durationMinutes, nextSessionISO } = note.meta;
+    const { mode, durationMinutes, nextSessionISO, nextSessionMode } = note.meta;
+
+    const sessionModes = library.sections.sessionMode?.items || [];
+    const sessionDurations = library.sections.sessionDuration?.items || [];
 
     // Resolve note data shape based on dynamic fields
     const noteData: NoteData = useMemo(() => {
@@ -58,6 +61,7 @@ export function Editor() {
             mode,
             durationMinutes,
             nextSessionISO,
+            nextSessionMode,
             fields: fieldsData
         };
     }, [template, note, library, mode, durationMinutes, nextSessionISO]);
@@ -173,6 +177,8 @@ export function Editor() {
                     <InlineSessionLine
                         mode={mode}
                         duration={durationMinutes}
+                        modeOptions={sessionModes}
+                        durationOptions={sessionDurations}
                         onModeChange={(m) => setMeta({ mode: m })}
                         onDurationChange={(d) => setMeta({ durationMinutes: d })}
                     />
@@ -217,13 +223,25 @@ export function Editor() {
                 })}
 
                 <section className="rounded-2xl border border-dark-3 bg-dark-2 overflow-hidden shadow-sm transition-all focus-within:border-accent-blue/50 focus-within:ring-1 focus-within:ring-accent-blue/50 flex flex-col sm:flex-row sm:items-center justify-between p-5 gap-4">
-                    <span className="text-sm font-medium text-light-3">Next session date</span>
-                    <input
-                        type="date"
-                        value={nextSessionISO || ""}
-                        onChange={(e) => setMeta({ nextSessionISO: e.target.value })}
-                        className="rounded-xl border border-dark-4 bg-dark-1 px-4 py-2 text-sm font-medium text-white outline-none cursor-pointer focus:border-accent-blue focus:ring-1 focus:ring-accent-blue"
-                    />
+                    <span className="text-sm font-medium text-light-3">Next session</span>
+                    <div className="flex gap-2 flex-wrap sm:flex-nowrap">
+                        <input
+                            type="date"
+                            value={nextSessionISO || ""}
+                            onChange={(e) => setMeta({ nextSessionISO: e.target.value })}
+                            className="rounded-xl border border-dark-4 bg-dark-3 hover:bg-dark-4 px-4 py-2 text-base font-medium text-white outline-none cursor-pointer focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-colors shadow-sm w-full sm:w-auto min-h-[44px]"
+                        />
+                        <select
+                            value={nextSessionMode || ""}
+                            onChange={(e) => setMeta({ nextSessionMode: e.target.value })}
+                            className="rounded-xl border border-dark-4 bg-dark-3 hover:bg-dark-4 px-4 py-2 text-base font-medium text-white outline-none cursor-pointer focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-colors shadow-sm w-full sm:w-auto min-h-[44px]"
+                            aria-label="Next session mode"
+                        >
+                            {sessionModes.map(opt => (
+                                <option key={opt.id} value={opt.label}>{opt.label}</option>
+                            ))}
+                        </select>
+                    </div>
                 </section>
 
                 <div className="pt-8 flex justify-center border-t border-dark-3/50 mt-12">

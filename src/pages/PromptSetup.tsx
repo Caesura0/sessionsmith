@@ -29,6 +29,8 @@ export function PromptSetup() {
 
     const tabs = [
         { id: "structure", label: "Note Structure", icon: LayoutTemplate },
+        { id: "sessionMode", label: "Session Modes", icon: FileText },
+        { id: "sessionDuration", label: "Session Durations", icon: FileText },
         ...template.fields
             .filter(f => f.type === "prompt-list" && !f.isHidden)
             .map(f => ({

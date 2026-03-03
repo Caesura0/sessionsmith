@@ -1,15 +1,19 @@
-import type { SessionMode } from "../../dataDictionary";
+import type { SessionMode, PromptItem } from "../../dataDictionary";
 
 export function InlineSessionLine({
   mode,
   duration,
+  modeOptions,
+  durationOptions,
   onModeChange,
   onDurationChange,
 }: {
   mode: SessionMode;
   duration: number;
+  modeOptions: PromptItem[];
+  durationOptions: PromptItem[];
   onModeChange: (m: SessionMode) => void;
-  onDurationChange: (d: 30 | 60 | 90) => void;
+  onDurationChange: (d: number) => void;
 }) {
   return (
     <p className="text-base leading-7 text-white">
@@ -17,12 +21,12 @@ export function InlineSessionLine({
       <InlineSelect
         ariaLabel="Session mode"
         value={mode}
-        onChange={(v) => onModeChange(v as SessionMode)}
+        onChange={(v) => onModeChange(v)}
         className="mx-1"
       >
-        <option value="telephone">telephone</option>
-        <option value="virtual">virtual</option>
-        <option value="in-person">in-person</option>
+        {modeOptions.map(opt => (
+          <option key={opt.id} value={opt.label}>{opt.label}</option>
+        ))}
       </InlineSelect>
 
       . The session lasted approximately{" "}
@@ -30,12 +34,12 @@ export function InlineSessionLine({
       <InlineSelect
         ariaLabel="Session duration (minutes)"
         value={String(duration)}
-        onChange={(v) => onDurationChange(Number(v) as 30 | 60 | 90)}
+        onChange={(v) => onDurationChange(Number(v))}
         className="mx-1"
       >
-        <option value={30}>30</option>
-        <option value={60}>60</option>
-        <option value={90}>90</option>
+        {durationOptions.map(opt => (
+          <option key={opt.id} value={opt.label}>{opt.label}</option>
+        ))}
       </InlineSelect>
 
       {" "}minutes.

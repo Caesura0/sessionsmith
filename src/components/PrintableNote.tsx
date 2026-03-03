@@ -1,8 +1,9 @@
 
 export type NoteData = {
-  mode: "telephone" | "virtual" | "in-person";
-  durationMinutes: 30 | 60 | 90;
+  mode: string;
+  durationMinutes: number;
   nextSessionISO?: string;
+  nextSessionMode?: string;
   // Dynamic fields from the template
   // Key = field.id, Value = string (for freetext) or string[] (for prompt-lists)
   fields: {
@@ -13,7 +14,7 @@ export type NoteData = {
 };
 
 export function PrintableNote({ data }: { data: NoteData }) {
-  const { mode, durationMinutes, nextSessionISO, fields } = data;
+  const { mode, durationMinutes, nextSessionISO, nextSessionMode, fields } = data;
 
   const fmtDate = (iso?: string) => {
     if (!iso) return "Not Documented";
@@ -60,7 +61,7 @@ export function PrintableNote({ data }: { data: NoteData }) {
       })}
 
       <p className="font-bold mt-3">The next session was booked for:</p>
-      <p>Date of next session - {fmtDate(nextSessionISO)}</p>
+      <p>Date of next session - {fmtDate(nextSessionISO)} {nextSessionMode && nextSessionISO ? `(${nextSessionMode})` : ""}</p>
     </div>
   );
 }
