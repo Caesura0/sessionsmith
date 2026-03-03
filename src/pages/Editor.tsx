@@ -83,8 +83,15 @@ export function Editor() {
 
     const handleClearAll = () => {
         if (window.confirm("WARNING: This will permanently delete your entire drafted session note. Are you completely sure you want to clear the form?")) {
-            // Reset Meta (leaving mode alone is usually fine, but resetting duration/next session is good)
-            setMeta({ durationMinutes: 60, nextSessionISO: undefined });
+            const defaultMode = sessionModes[0]?.label || "virtual";
+            const defaultDuration = Number(sessionDurations[0]?.label) || 60;
+
+            setMeta({
+                mode: defaultMode,
+                durationMinutes: defaultDuration,
+                nextSessionISO: "",
+                nextSessionMode: defaultMode
+            });
 
             // Clear all fields based on template
             for (const field of template.fields) {
