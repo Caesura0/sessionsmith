@@ -7,48 +7,142 @@
  * These names enable classes like:
  *  - bg-dark-1 text-light-1 border-dark-3 etc.
  */
-@theme {
-  --color-dark-0: #050505;
-  --color-dark-1: #0a0a0c;
-  --color-dark-2: #121214;
-  --color-dark-3: #1c1c1f;
-  --color-dark-4: #27272a;
-  --color-dark-5: #3f3f46;
-
-  --color-light-1: #ffffff;
-  --color-light-2: #f4f4f5;
-  --color-light-3: #d4d4d8;
-  --color-light-4: #a1a1aa;
+/**
+ * Design tokens using CSS variables for theming.
+ */
+:root {
+  /* Default (Dark) variables */
+  --bg-app: #0a0a0c;
+  --bg-sidebar: #121214;
+  --bg-card: #1c1c1f;
+  --bg-input: #27272a;
+  --border-main: #1c1c1f;
+  --border-subtle: rgba(255, 255, 255, 0.08);
   
-  --color-accent-blue: #3b82f6;
-  --color-accent-blue-hover: #2563eb;
-  --color-accent-purple: #8b5cf6;
+  --text-primary: #ffffff;
+  --text-secondary: #f4f4f5;
+  --text-tertiary: #d4d4d8;
+  --text-muted: #a1a1aa;
+  --text-dim: #3f3f46;
+
+  --accent-primary: #3b82f6;
+  --accent-primary-hover: #2563eb;
+  --accent-secondary: #8b5cf6;
+  
+  --shadow-glow-color: rgba(59, 130, 246, 0.3);
+  --shadow-glow-purple-color: rgba(139, 92, 246, 0.3);
+}
+
+/* Light Theme Overrides */
+.theme-light {
+  --bg-app: #ffffff;
+  --bg-sidebar: #f8f8f8;
+  --bg-card: #ffffff;
+  --bg-input: #f1f1f1;
+  --border-main: #e5e5e5;
+  --border-subtle: rgba(0, 0, 0, 0.05);
+
+  --text-primary: #09090b;
+  --text-secondary: #27272a;
+  --text-tertiary: #52525b;
+  --text-muted: #71717a;
+  --text-dim: #a1a1aa;
+
+  --accent-primary: #2563eb;
+  --accent-primary-hover: #1d4ed8;
+  --accent-secondary: #7c3aed;
+  
+  --shadow-glow-color: rgba(37, 99, 235, 0.15);
+  --shadow-glow-purple-color: rgba(124, 58, 237, 0.15);
+}
+
+/* Slate Theme Overrides */
+.theme-slate {
+  --bg-app: #0f172a;
+  --bg-sidebar: #1e293b;
+  --bg-card: #1e293b;
+  --bg-input: #334155;
+  --border-main: #334155;
+  --border-subtle: rgba(255, 255, 255, 0.05);
+
+  --text-primary: #f8fafc;
+  --text-secondary: #f1f5f9;
+  --text-tertiary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --accent-primary: #38bdf8;
+  --accent-primary-hover: #0ea5e9;
+  --accent-secondary: #a78bfa;
+
+  --shadow-glow-color: rgba(56, 189, 248, 0.2);
+  --shadow-glow-purple-color: rgba(167, 139, 250, 0.2);
+}
+
+/* Ocean Theme Overrides */
+.theme-ocean {
+  --bg-app: #042f2e;
+  --bg-sidebar: #134e4a;
+  --bg-card: #134e4a;
+  --bg-input: #115e59;
+  --border-main: #115e59;
+  --border-subtle: rgba(255, 255, 255, 0.05);
+
+  --text-primary: #f0fdfa;
+  --text-secondary: #ccfbf1;
+  --text-tertiary: #99f6e4;
+  --text-muted: #5eead4;
+  --text-dim: #2dd4bf;
+
+  --accent-primary: #2dd4bf;
+  --accent-primary-hover: #14b8a6;
+  --accent-secondary: #818cf8;
+
+  --shadow-glow-color: rgba(45, 212, 191, 0.2);
+  --shadow-glow-purple-color: rgba(129, 140, 248, 0.2);
+}
+
+@theme {
+  --color-dark-0: #050505; /* Kept for legacy if needed, but we should use semantic vars */
+  --color-dark-1: var(--bg-app);
+  --color-dark-2: var(--bg-sidebar);
+  --color-dark-3: var(--bg-card);
+  --color-dark-4: var(--bg-input);
+  --color-dark-5: var(--text-dim);
+
+  --color-light-1: var(--text-primary);
+  --color-light-2: var(--text-secondary);
+  --color-light-3: var(--text-tertiary);
+  --color-light-4: var(--text-muted);
+  
+  --color-accent-blue: var(--accent-primary);
+  --color-accent-blue-hover: var(--accent-primary-hover);
+  --color-accent-purple: var(--accent-secondary);
 
   /* Custom Glows */
-  --shadow-glow: 0 0 15px -3px rgba(59, 130, 246, 0.3);
-  --shadow-glow-purple: 0 0 15px -3px rgba(139, 92, 246, 0.3);
+  --shadow-glow: 0 0 15px -3px var(--shadow-glow-color);
+  --shadow-glow-purple: 0 0 15px -3px var(--shadow-glow-purple-color);
 }
 
 @layer utilities {
   .glass {
-    background: rgba(28, 28, 31, 0.7);
+    background: rgba(var(--bg-card), 0.7); /* Note: this might need adjustment if using hex */
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-subtle);
   }
 }
 
 body {
-  background-color: var(--color-dark-1);
-  color: var(--color-light-2);
+  background-color: var(--bg-app);
+  color: var(--text-secondary);
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @media print {
-  /* Set nice page margins; adjust to taste */
   @page { margin: 20mm; }
-  /* Make sure the app background doesn't leak into print */
   html, body {
     background: white !important;
     color: black !important;
