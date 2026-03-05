@@ -100,6 +100,7 @@ export const STORAGE_KEYS = {
     promptLibrary: "promptLibrary:v1",
     noteDraft: "noteDraft:v1",
     noteTemplate: "noteTemplate:v1",
+    visualTheme: "notesmith_theme",
 } as const;
 
 /* ============================================================================

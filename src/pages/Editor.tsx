@@ -117,9 +117,9 @@ export function Editor() {
                 {ids.map((id, index) => {
                     const resolvedLabel = resolveSelectedLabels(sectionId, [id], library)[0] || `[Unknown: ${id}]`;
                     return (
-                        <div key={id} className="group relative flex items-center justify-between rounded-xl bg-dark-2 border border-white/5 px-4 py-3 w-full transition-all hover:bg-dark-3 hover:border-white/10 shadow-sm">
-                            <span className="flex-1 pr-4 text-sm font-medium">{resolvedLabel}</span>
-                            <div className="hidden group-hover:flex items-center gap-1 opacity-80 pl-3 border-l border-white/10">
+                        <div key={id} className="group relative flex items-center justify-between rounded-xl bg-dark-4 border border-border-subtle px-4 py-3 w-full transition-all hover:bg-dark-3 hover:border-white/10 shadow-sm">
+                            <span className="flex-1 pr-4 text-sm font-medium text-light-2">{resolvedLabel}</span>
+                            <div className="hidden group-hover:flex items-center gap-1 opacity-80 pl-3 border-l border-border-subtle">
                                 <button
                                     onClick={(e) => { e.stopPropagation(); moveSelection(sectionId, index, "up"); }}
                                     className="p-1.5 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer" title="Move up"
@@ -152,10 +152,10 @@ export function Editor() {
         <div className="space-y-6 max-w-3xl pb-24 text-left mx-auto">
             <header className="mb-8 flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Session Notes</h1>
-                    <p className="text-light-4">Draft your session note. Changes are saved locally.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-light-1 mb-2">Session Notes</h1>
+                    <p className="text-light-4 font-medium">Draft your session note. Changes are saved locally.</p>
                 </div>
-                <div className="flex items-center gap-2 print:hidden backdrop-blur-md bg-dark-2/80 rounded-2xl p-1.5 border border-white/5 shadow-lg">
+                <div className="flex items-center gap-2 print:hidden backdrop-blur-md bg-dark-3/80 rounded-2xl p-1.5 border border-border-subtle shadow-lg">
                     <button
                         onClick={handleCopy}
                         className="rounded-xl flex items-center gap-2 bg-accent-blue px-4 py-2 text-sm font-medium text-white hover:bg-accent-blue-hover transition-colors focus:ring-2 focus:ring-accent-blue focus:outline-none"
@@ -180,7 +180,7 @@ export function Editor() {
             </header>
 
             <div className="print:hidden space-y-6">
-                <section className="rounded-2xl border border-dark-3 bg-dark-2 p-5 shadow-sm transition-colors hover:border-dark-4">
+                <section className="rounded-2xl border border-white/5 glass p-5 shadow-sm transition-all duration-300 hover:border-white/20">
                     <InlineSessionLine
                         mode={mode}
                         duration={durationMinutes}
@@ -196,9 +196,9 @@ export function Editor() {
                     if (field.type === "freetext") {
                         const val = note.freeText[field.id] || "";
                         return (
-                            <section key={field.id} className="rounded-2xl border border-dark-3 bg-dark-2 overflow-hidden shadow-sm transition-all focus-within:border-accent-blue/50 focus-within:ring-1 focus-within:ring-accent-blue/50">
-                                <div className="px-5 py-3 border-b border-dark-3/50 bg-dark-3/20 flex items-center justify-between">
-                                    <span className="text-sm font-medium text-light-3">{field.label}</span>
+                            <section key={field.id} className="rounded-2xl border border-white/5 glass overflow-hidden shadow-sm transition-all duration-300 focus-within:border-accent-purple focus-within:ring-1 focus-within:ring-accent-purple focus-within:shadow-[var(--shadow-glow-purple)]">
+                                <div className="px-5 py-3 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                                    <span className="text-sm font-medium text-white">{field.label}</span>
                                 </div>
                                 <textarea
                                     value={val}
@@ -213,11 +213,11 @@ export function Editor() {
                         return (
                             <section
                                 key={field.id}
-                                className="rounded-2xl border border-dark-3 bg-dark-2 shadow-sm transition-all hover:border-accent-blue/40 cursor-pointer overflow-hidden group"
+                                className="rounded-2xl border border-white/5 glass shadow-sm transition-all duration-300 hover:border-white/20 hover:bg-white/5 cursor-pointer overflow-hidden group active:scale-[0.99]"
                                 onClick={() => setPicker({ id: field.id, label: field.label })}
                             >
-                                <div className="px-5 py-3 border-b border-dark-3/50 bg-dark-3/20 flex items-center justify-between group-hover:bg-accent-blue/5 transition-colors">
-                                    <span className="text-sm font-medium text-light-3 group-hover:text-accent-blue transition-colors">{field.label}</span>
+                                <div className="px-5 py-3 border-b border-white/5 bg-white/5 flex items-center justify-between transition-colors">
+                                    <span className="text-sm font-medium text-white group-hover:text-accent-purple transition-colors">{field.label}</span>
                                     <span className="text-xs font-medium bg-dark-4 text-light-4 px-2 py-0.5 rounded-full">{selectedCount} selected</span>
                                 </div>
                                 <div className="p-5">
@@ -229,23 +229,23 @@ export function Editor() {
                     return null;
                 })}
 
-                <section className="rounded-2xl border border-dark-3 bg-dark-2 overflow-hidden shadow-sm transition-all focus-within:border-accent-blue/50 focus-within:ring-1 focus-within:ring-accent-blue/50 flex flex-col sm:flex-row sm:items-center justify-between p-5 gap-4">
-                    <span className="text-sm font-medium text-light-3">Next session</span>
+                <section className="rounded-2xl border border-white/5 glass overflow-hidden shadow-sm transition-all duration-300 focus-within:border-accent-purple focus-within:ring-1 focus-within:ring-accent-purple focus-within:shadow-[var(--shadow-glow-purple)] flex flex-col sm:flex-row sm:items-center justify-between p-5 gap-4">
+                    <span className="text-sm font-medium text-white">Next session</span>
                     <div className="flex gap-2 flex-wrap sm:flex-nowrap">
                         <input
                             type="date"
                             value={nextSessionISO || ""}
                             onChange={(e) => setMeta({ nextSessionISO: e.target.value })}
-                            className="rounded-xl border border-dark-4 bg-dark-3 hover:bg-dark-4 px-4 py-2 text-base font-medium text-white outline-none cursor-pointer focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-colors shadow-sm w-full sm:w-auto min-h-[44px]"
+                            className="rounded-xl border border-white/10 bg-black/20 hover:bg-black/40 px-4 py-2 text-base font-medium text-white outline-none cursor-pointer focus:border-accent-purple focus:ring-1 focus:ring-accent-purple transition-colors shadow-sm w-full sm:w-auto min-h-[44px] backdrop-blur-md"
                         />
                         <select
                             value={nextSessionMode || ""}
                             onChange={(e) => setMeta({ nextSessionMode: e.target.value })}
-                            className="rounded-xl border border-dark-4 bg-dark-3 hover:bg-dark-4 px-4 py-2 text-base font-medium text-white outline-none cursor-pointer focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-colors shadow-sm w-full sm:w-auto min-h-[44px]"
+                            className="rounded-xl border border-white/10 bg-black/20 hover:bg-black/40 px-4 py-2 text-base font-medium text-white outline-none cursor-pointer focus:border-accent-purple focus:ring-1 focus:ring-accent-purple transition-colors shadow-sm w-full sm:w-auto min-h-[44px] backdrop-blur-md"
                             aria-label="Next session mode"
                         >
                             {sessionModes.map(opt => (
-                                <option key={opt.id} value={opt.label}>{opt.label}</option>
+                                <option key={opt.id} value={opt.label} className="bg-dark-3 text-light-1">{opt.label}</option>
                             ))}
                         </select>
                     </div>

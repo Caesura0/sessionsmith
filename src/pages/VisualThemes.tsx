@@ -1,12 +1,19 @@
 import { useTheme } from "../context/ThemeContext";
 import type { VisualTheme } from "../context/ThemeContext";
-import { Check, Palette, Moon, Sun, Monitor, Waves } from "lucide-react";
+import { Check, Palette, Moon, Sun, Monitor, Waves, Sparkles } from "lucide-react";
 import { cn } from "../utils/cn";
 
 export function VisualThemes() {
     const { theme, setTheme } = useTheme();
 
     const themes: { id: VisualTheme; label: string; icon: any; description: string; colors: string[] }[] = [
+        {
+            id: "midnight",
+            label: "Midnight Glow",
+            icon: Sparkles,
+            description: "Modern gradient with electric accents.",
+            colors: ["#0f172a", "#020617", "#38bdf8"]
+        },
         {
             id: "dark",
             label: "Pro Dark",

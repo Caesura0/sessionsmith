@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 
-export type VisualTheme = "dark" | "light" | "slate" | "ocean";
+export type VisualTheme = "dark" | "light" | "slate" | "ocean" | "midnight";
 
 interface ThemeContextType {
     theme: VisualTheme;
@@ -21,11 +21,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
         // Remove all theme classes first
         const root = document.documentElement;
-        root.classList.remove("theme-dark", "theme-light", "theme-slate", "theme-ocean");
+        root.classList.remove("theme-dark", "theme-light", "theme-slate", "theme-ocean", "theme-midnight");
         root.classList.add(`theme-${theme}`);
 
         // Also update standard accessibility meta or body colors if needed
-        document.body.className = theme === "light" ? "bg-white text-zinc-900" : "bg-dark-1 text-light-2";
+        document.body.className = theme === "light" ? "text-zinc-900" : "text-light-2";
     }, [theme]);
 
     return (

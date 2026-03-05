@@ -39,7 +39,7 @@ export function Layout() {
     }
 
     return (
-        <div className="flex h-screen w-full bg-dark-1 text-light-2 overflow-hidden theme-transition">
+        <div className="flex h-screen w-full text-light-2 overflow-hidden theme-transition">
             {/* Sidebar */}
             <aside className="w-[4.5rem] sm:w-64 border-r border-dark-3 bg-dark-2 flex flex-col shrink-0 transition-all duration-300">
                 <div className="h-16 flex items-center justify-center sm:justify-start sm:px-6 border-b border-dark-3 text-white">

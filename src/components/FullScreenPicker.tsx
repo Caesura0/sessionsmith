@@ -34,12 +34,12 @@ export function FullScreenPicker({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-dark-1/95 backdrop-blur-md text-white text-left animate-in fade-in duration-200">
-      <div className="sticky top-0 border-b border-white/10 bg-dark-2/80 backdrop-blur z-20">
+    <div className="fixed inset-0 z-50 flex flex-col bg-dark-1/95 backdrop-blur-xl text-light-1 text-left animate-in fade-in duration-300">
+      <div className="sticky top-0 border-b border-border-subtle bg-dark-3/80 backdrop-blur z-20">
         <div className="flex max-w-5xl items-center gap-2 px-4 py-3 sm:px-6">
           <button
             onClick={onClose}
-            className="rounded-xl border border-white/10 bg-dark-3/50 px-4 py-2 text-sm text-light-3 hover:bg-dark-3 hover:text-white transition-colors"
+            className="rounded-xl border border-border-subtle bg-dark-4/50 px-4 py-2 text-sm text-light-4 hover:bg-dark-4 hover:text-light-1 transition-colors"
             aria-label="Close"
           >
             Cancel
@@ -50,7 +50,7 @@ export function FullScreenPicker({
           </div>
           <button
             onClick={() => setLocal([])}
-            className="rounded-xl px-4 py-2 text-sm text-light-4 hover:text-white transition-colors"
+            className="rounded-xl px-4 py-2 text-sm text-light-4 hover:text-light-1 transition-colors"
           >
             Clear
           </button>

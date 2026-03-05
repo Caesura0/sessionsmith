@@ -57,13 +57,13 @@ function SortablePickerItem({
     };
 
     return (
-        <li ref={setNodeRef} style={style} className={cn("relative group text-left", isDragging && "shadow-xl rounded-2xl")}>
+        <li ref={setNodeRef} style={style} className={cn("relative group text-left transition-shadow duration-300", isDragging && "shadow-xl rounded-2xl")}>
             {editingId === opt.id ? (
-                <div className="w-full rounded-2xl border border-accent-blue bg-dark-2 px-4 py-3 flex gap-2 items-center">
+                <div className="w-full rounded-2xl border border-accent-blue bg-dark-4 px-4 py-3 flex gap-2 items-center shadow-lg">
                     <input
                         autoFocus
                         type="text"
-                        className="flex-1 bg-transparent text-sm text-white outline-none"
+                        className="flex-1 bg-transparent text-sm text-light-1 outline-none"
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
                         onKeyDown={(e) => {
@@ -78,8 +78,8 @@ function SortablePickerItem({
                 <div className={cn(
                     "w-full flex items-stretch justify-between rounded-2xl border transition-all overflow-hidden text-left",
                     active
-                        ? "border-accent-blue bg-accent-blue/10 text-white"
-                        : "border-dark-3/50 bg-dark-2 hover:bg-dark-3 hover:border-dark-3 text-light-2",
+                        ? "border-accent-blue bg-accent-blue/10 text-light-1"
+                        : "border-border-subtle bg-dark-4 hover:bg-dark-3 hover:border-dark-3 text-light-2",
                 )}>
                     {!isSearchActive && (
                         <div
@@ -106,7 +106,7 @@ function SortablePickerItem({
                         )}
                     </button>
                     {!hideControls && (
-                        <div className="flex items-center space-x-1 pr-3 pl-2 border-l border-white/5 bg-dark-2/50 backdrop-blur-sm">
+                        <div className="flex items-center space-x-1 pr-3 pl-2 border-l border-border-subtle bg-dark-3/50 backdrop-blur-sm">
                             {!isSearchActive && (
                                 <>
                                     <button onClick={(e) => { e.stopPropagation(); moveItem(section, opt.id, "up", true); }} className="p-1 hover:bg-white/10 hover:text-white rounded flex items-center justify-center w-7 h-7 transition-colors" title="Move up">↑</button>
@@ -275,7 +275,7 @@ export function PromptList({ section, selected, onChange, hideControls }: Prompt
                             }
                         }}
                         placeholder="Search limits, add missing prompts..."
-                        className="w-full rounded-2xl border border-dark-3 bg-dark-2 pl-10 pr-4 py-2.5 text-sm text-light-1 outline-none placeholder:text-dark-5 focus:border-accent-blue/50 focus:ring-1 focus:ring-accent-blue/50 transition-all shadow-sm"
+                        className="w-full rounded-2xl border border-border-subtle bg-dark-4 pl-10 pr-4 py-2.5 text-sm text-light-1 outline-none placeholder:text-dark-5 focus:border-accent-blue/50 focus:ring-1 focus:ring-accent-blue/50 transition-all shadow-sm"
                     />
                     {isSearchActive && (
                         <button

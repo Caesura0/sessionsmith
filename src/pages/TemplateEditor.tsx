@@ -74,12 +74,17 @@ function SortableFieldItem({
                         <Icon className={cn("w-4 h-4", isFreeText ? "text-blue-400" : "text-green-400")} />
                     )}
                 </div>
-                <div>
-                    <div className={cn("text-sm font-medium", field.isHidden ? "text-light-5 line-through decoration-dark-4" : "text-light-2")}>
+                <div className="flex flex-col">
+                    <div className={cn("text-base font-bold tracking-tight", field.isHidden ? "text-light-5 line-through decoration-dark-4" : "text-white")}>
                         {field.label}
-                        {field.isHidden && <span className="ml-2 text-xs text-red-400 font-normal no-underline">Hidden</span>}
+                        {field.isHidden && <span className="ml-2 px-2 py-0.5 rounded-md bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-medium uppercase tracking-wider no-underline align-middle">Hidden</span>}
                     </div>
-                    <div className="text-xs text-light-5 uppercase tracking-wider">{field.type}</div>
+                    <div className={cn(
+                        "mt-1 w-fit px-2 py-0.5 rounded-md border text-[10px] font-medium uppercase tracking-widest",
+                        isFreeText ? "bg-blue-500/10 border-blue-500/20 text-blue-400" : "bg-green-500/10 border-green-500/20 text-green-400"
+                    )}>
+                        {field.type === 'freetext' ? 'Free Text Box' : 'Prompt Library List'}
+                    </div>
                 </div>
             </div>
 

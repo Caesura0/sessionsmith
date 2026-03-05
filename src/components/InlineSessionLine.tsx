@@ -64,9 +64,9 @@ function InlineSelect(props: {
         className={[
           "align-baseline text-sm",
           "px-2 py-1 rounded-lg",
-          "bg-dark-2 text-light-1 border border-dark-4",
-          "outline-none focus:border-light-3 focus:ring-1 focus:ring-light-3",
-          "cursor-pointer"
+          "bg-black/20 text-white border border-white/10 backdrop-blur-md",
+          "outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple",
+          "hover:bg-black/40 cursor-pointer transition-colors"
         ].join(" ")}
       >
         {children}
