@@ -66,7 +66,8 @@ function InlineSelect(props: {
           "px-2 py-1 rounded-lg",
           "bg-black/20 text-white border border-white/10 backdrop-blur-md",
           "outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple",
-          "hover:bg-black/40 cursor-pointer transition-colors"
+          "hover:bg-black/40 cursor-pointer transition-colors",
+          "[color-scheme:dark]"
         ].join(" ")}
       >
         {children}

@@ -37,7 +37,7 @@ export function buildNoteHTML(d: NoteData): string {
   <div style="font-family: system-ui,Segoe UI,Roboto,Arial; line-height:1.45; color:#000;">
     <h1 style="font-size:14pt; margin:0 0 8pt 0;">Session Notes</h1>
 
-    <p>The client attended the scheduled session on by ${esc(d.mode)}. The session lasted approximately ${d.durationMinutes} minutes.</p>
+    <p>The client attended the scheduled session via ${esc(d.mode)}. The session lasted approximately ${d.durationMinutes} minutes.</p>
 
     ${fieldsHtml}
 
@@ -52,7 +52,7 @@ export function buildNotePlainText(d: NoteData): string {
 
   const lines = [
     "Session Notes",
-    `The client attended the scheduled session on by ${d.mode}. The session lasted approximately ${d.durationMinutes} minutes.`,
+    `The client attended the scheduled session via ${d.mode}. The session lasted approximately ${d.durationMinutes} minutes.`,
     ""
   ];
 

@@ -64,7 +64,7 @@ export function Editor() {
             nextSessionMode,
             fields: fieldsData
         };
-    }, [template, note, library, mode, durationMinutes, nextSessionISO]);
+    }, [template, note, library, mode, durationMinutes, nextSessionISO, nextSessionMode]);
 
     async function handleCopy() {
         try {
@@ -236,12 +236,12 @@ export function Editor() {
                             type="date"
                             value={nextSessionISO || ""}
                             onChange={(e) => setMeta({ nextSessionISO: e.target.value })}
-                            className="rounded-xl border border-white/10 bg-black/20 hover:bg-black/40 px-4 py-2 text-base font-medium text-white outline-none cursor-pointer focus:border-accent-purple focus:ring-1 focus:ring-accent-purple transition-colors shadow-sm w-full sm:w-auto min-h-[44px] backdrop-blur-md"
+                            className="rounded-xl border border-white/10 bg-black/20 hover:bg-black/40 px-4 py-2 text-base font-medium text-white outline-none cursor-pointer focus:border-accent-purple focus:ring-1 focus:ring-accent-purple transition-colors shadow-sm w-full sm:w-auto min-h-[44px] backdrop-blur-md [color-scheme:dark]"
                         />
                         <select
                             value={nextSessionMode || ""}
                             onChange={(e) => setMeta({ nextSessionMode: e.target.value })}
-                            className="rounded-xl border border-white/10 bg-black/20 hover:bg-black/40 px-4 py-2 text-base font-medium text-white outline-none cursor-pointer focus:border-accent-purple focus:ring-1 focus:ring-accent-purple transition-colors shadow-sm w-full sm:w-auto min-h-[44px] backdrop-blur-md"
+                            className="rounded-xl border border-white/10 bg-black/20 hover:bg-black/40 px-4 py-2 text-base font-medium text-white outline-none cursor-pointer focus:border-accent-purple focus:ring-1 focus:ring-accent-purple transition-colors shadow-sm w-full sm:w-auto min-h-[44px] backdrop-blur-md [color-scheme:dark]"
                             aria-label="Next session mode"
                         >
                             {sessionModes.map(opt => (

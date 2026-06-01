@@ -34,7 +34,7 @@ export function PrintableNote({ data }: { data: NoteData }) {
       <h1 className="text-[14pt] font-bold mb-2">Session Notes</h1>
 
       <p>
-        The client attended the scheduled session on by {mode}. The session lasted approximately {durationMinutes} minutes.
+        The client attended the scheduled session via {mode}. The session lasted approximately {durationMinutes} minutes.
       </p>
 
       {fields.map((field) => {
