@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
-import type { PromptSectionKey } from "../../dataDictionary";
+import type { PromptSectionKey } from "../dataDictionary";
 import { PromptList } from "./PromptList";
 
 type Props = {

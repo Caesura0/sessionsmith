@@ -1,4 +1,4 @@
-import type { PromptLibrary, PromptSectionKey } from "../../dataDictionary";
+import type { PromptLibrary, PromptSectionKey } from "../dataDictionary";
 
 export function resolveSelectedLabels(
     section: PromptSectionKey,

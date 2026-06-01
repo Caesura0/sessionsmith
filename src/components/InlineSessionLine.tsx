@@ -1,4 +1,4 @@
-import type { SessionMode, PromptItem } from "../../dataDictionary";
+import type { SessionMode, PromptItem } from "../dataDictionary";
 
 export function InlineSessionLine({
   mode,

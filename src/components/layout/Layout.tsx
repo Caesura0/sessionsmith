@@ -3,9 +3,12 @@ import { CopyPlus, Settings, Home as HomeIcon, LayoutTemplate, LogOut, Palette }
 import { cn } from "../../utils/cn";
 import { useAuth } from "../../context/AuthContext";
 
+import { useAppStore } from "../../store/store";
+
 export function Layout() {
     const location = useLocation();
     const { logout } = useAuth();
+    const hasHydrated = useAppStore(state => state._hasHydrated);
 
     const primaryLinks = [
         { name: "Home", href: "/", icon: HomeIcon },
@@ -35,6 +38,17 @@ export function Layout() {
                 <link.icon className={cn("w-5 h-5 transition-transform duration-200", isActive ? "scale-110" : "group-hover:scale-110")} />
                 <span className="ml-3 hidden sm:block whitespace-nowrap">{link.name}</span>
             </Link>
+        );
+    }
+
+    if (!hasHydrated) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center bg-dark-1 text-light-2 theme-transition">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent-blue border-t-transparent"></div>
+                    <p className="text-sm font-medium text-light-4 animate-pulse">Loading workspace...</p>
+                </div>
+            </div>
         );
     }
 

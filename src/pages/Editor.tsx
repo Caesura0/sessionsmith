@@ -5,7 +5,7 @@ import { usePromptLibrary } from "../hooks/usePromptLibrary";
 import { useNoteDraft } from "../hooks/useNoteDraft";
 import { useNoteTemplate } from "../hooks/useNoteTemplate";
 import { resolveSelectedLabels } from "../utils/resolveSelections";
-import { createEmptyNoteDraft } from "../../dataDictionary";
+import { createEmptyNoteDraft } from "../dataDictionary";
 import { InlineSessionLine } from "../components/InlineSessionLine";
 import { PrintableNote, type NoteData } from "../components/PrintableNote";
 import { copyNoteToClipboard } from "../utils/clipboard";

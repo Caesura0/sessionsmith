@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNoteTemplate } from "../hooks/useNoteTemplate";
-import type { TemplateField, TemplateFieldType } from "../../dataDictionary";
+import type { TemplateField, TemplateFieldType } from "../dataDictionary";
 import { Plus, GripVertical, Trash2, Edit3, AlignLeft, ListTodo, Eye, EyeOff } from "lucide-react";
 import {
     DndContext,

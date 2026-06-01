@@ -1,5 +1,5 @@
-import { STORAGE_KEYS } from "../../dataDictionary";
-import type { PromptLibrary, PromptItem } from "../../dataDictionary";
+import { STORAGE_KEYS } from "../dataDictionary";
+import type { PromptLibrary, PromptItem } from "../dataDictionary";
 
 export function exportPromptLibrary(): void {
     const data = localStorage.getItem(STORAGE_KEYS.promptLibrary);

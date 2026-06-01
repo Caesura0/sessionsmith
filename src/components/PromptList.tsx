@@ -17,7 +17,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { usePromptLibrary } from "../hooks/usePromptLibrary";
-import type { PromptSectionKey, PromptItem } from "../../dataDictionary";
+import type { PromptSectionKey, PromptItem } from "../dataDictionary";
 import { cn } from "../utils/cn";
 import { Search, Plus } from "lucide-react";
 

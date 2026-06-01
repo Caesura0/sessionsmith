@@ -1,7 +1,4 @@
-import { loadNoteTemplate, saveNoteTemplate } from "../storage/noteTemplateStorage";
-import { loadPromptLibrary, savePromptLibrary } from "../storage/promptLibraryStorage";
-import { loadNoteDraft, saveNoteDraft } from "../storage/noteDraftStorage";
-import { STORAGE_KEYS } from "../../dataDictionary";
+import { useAppStore } from "../store/store";
 
 export interface AppStateData {
     template: any;
@@ -10,17 +7,19 @@ export interface AppStateData {
 }
 
 export function exportAllAppData(): AppStateData {
+    const state = useAppStore.getState();
     return {
-        template: loadNoteTemplate(),
-        prompts: loadPromptLibrary(),
-        draft: loadNoteDraft()
+        template: state.template,
+        prompts: state.library,
+        draft: state.draft
     };
 }
 
 export function importAllAppData(data: AppStateData) {
-    if (data.template) saveNoteTemplate(data.template);
-    if (data.prompts) savePromptLibrary(data.prompts);
-    if (data.draft) saveNoteDraft(data.draft);
+    const state = useAppStore.getState();
+    if (data.template) state.setTemplate(data.template);
+    if (data.prompts) state.setLibrary(data.prompts);
+    if (data.draft) state.setDraft(data.draft);
 }
 
 export function downloadBackupFile() {
@@ -39,8 +38,5 @@ export function downloadBackupFile() {
 }
 
 export function resetAllAppData() {
-    localStorage.removeItem(STORAGE_KEYS.promptLibrary);
-    localStorage.removeItem(STORAGE_KEYS.noteDraft);
-    localStorage.removeItem(STORAGE_KEYS.noteTemplate);
-    window.dispatchEvent(new Event('appDataChanged'));
+    useAppStore.getState().resetAllData();
 }

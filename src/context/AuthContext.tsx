@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { pushToDrive, pullFromDrive } from "../utils/googleDriveSync";
 import { exportAllAppData, importAllAppData } from "../utils/appDataSync";
+import { useAppStore } from "../store/store";
 
 interface AuthContextType {
     isLoggedIn: boolean;
@@ -109,18 +110,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         let timeoutId: number;
 
-        const handleAppDataChange = () => {
+        const unsubscribe = useAppStore.subscribe((state, prevState) => {
+            // Check if actual data changed, ignoring hydration state
+            if (state.draft === prevState?.draft && 
+                state.library === prevState?.library && 
+                state.template === prevState?.template) {
+                return;
+            }
+            
             clearTimeout(timeoutId);
             timeoutId = window.setTimeout(() => {
                 console.log("Auto-saving to Google Drive...");
                 pushData();
             }, 5000); // 5 second debounce
-        };
-
-        window.addEventListener('appDataChanged', handleAppDataChange);
+        });
 
         return () => {
-            window.removeEventListener('appDataChanged', handleAppDataChange);
+            unsubscribe();
             clearTimeout(timeoutId);
         };
     }, [token, pushData]);

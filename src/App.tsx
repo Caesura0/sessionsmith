@@ -11,7 +11,7 @@ import { VisualThemes } from "./pages/VisualThemes";
 import { Settings } from "./pages/Settings";
 import { Login } from "./pages/Login";
 
-const GOOGLE_CLIENT_ID = "795078193322-dlh0d3un13s6a4ajhcpgtjarhucj53sh.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export default function App() {
   return (
