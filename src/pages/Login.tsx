@@ -2,21 +2,37 @@ import { useAuth } from "../context/AuthContext";
 import { CopyPlus, Cloud, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { useModalStore } from "../store/modalStore";
 
 export function Login() {
-    const { isLoggedIn, login, pullData, isSyncing, error } = useAuth();
+    const { isLoggedIn, isGuest, login, continueAsGuest, pullData, isSyncing, error } = useAuth();
     const navigate = useNavigate();
+    const { confirmDialog } = useModalStore();
 
     useEffect(() => {
         async function hydrateAndRedirect() {
             if (isLoggedIn) {
-                // Pull immediately on successful login to overlay local state
-                await pullData();
+                if (!isGuest) {
+                    // Pull immediately on successful login to overlay local state
+                    await pullData();
+                }
                 navigate("/");
             }
         }
         hydrateAndRedirect();
-    }, [isLoggedIn, navigate, pullData]);
+    }, [isLoggedIn, isGuest, navigate, pullData]);
+
+    const handleSkipLogin = async () => {
+        const confirmed = await confirmDialog({
+            title: "Continue without saving?",
+            message: "If you continue without logging in, your data will not be saved to the cloud. You will have to manually export and import your changes to prevent data loss. Proceed?",
+            danger: true,
+            confirmText: "Continue as Guest"
+        });
+        if (confirmed) {
+            continueAsGuest();
+        }
+    };
 
     // If suddenly rendering while already logged in (but not in effect yet), just flash a loading screen
     if (isLoggedIn) {
@@ -50,7 +66,7 @@ export function Login() {
                 <button
                     onClick={login}
                     disabled={isSyncing}
-                    className="w-full rounded-xl bg-white text-dark-1 px-6 py-4 text-base font-semibold hover:bg-light-2 transition-colors focus:ring-4 focus:ring-white/20 focus:outline-none flex items-center justify-center gap-3 shadow-lg"
+                    className="w-full rounded-xl bg-white text-dark-1 px-6 py-4 text-base font-semibold hover:bg-light-2 transition-colors focus:ring-4 focus:ring-white/20 focus:outline-none flex items-center justify-center gap-3 shadow-lg mb-4"
                 >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -59,6 +75,14 @@ export function Login() {
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                     </svg>
                     {isSyncing ? "Connecting..." : "Continue with Google"}
+                </button>
+
+                <button
+                    onClick={handleSkipLogin}
+                    disabled={isSyncing}
+                    className="w-full rounded-xl border border-dark-4 bg-dark-2 text-light-3 px-6 py-4 text-base font-semibold hover:bg-dark-3 hover:text-white transition-colors focus:ring-4 focus:ring-dark-4 focus:outline-none flex items-center justify-center gap-3 shadow-lg"
+                >
+                    Skip and Continue as Guest
                 </button>
 
                 <p className="mt-8 text-xs text-dark-5 text-center px-4">

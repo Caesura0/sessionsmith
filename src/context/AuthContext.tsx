@@ -7,10 +7,12 @@ import { useAppStore } from "../store/store";
 
 interface AuthContextType {
     isLoggedIn: boolean;
+    isGuest: boolean;
     isSyncing: boolean;
     error: string | null;
     login: () => void;
     logout: () => void;
+    continueAsGuest: () => void;
     pushData: () => Promise<void>;
     pullData: () => Promise<boolean>;
 }
@@ -18,6 +20,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+    const [isGuest, setIsGuest] = useState<boolean>(() => {
+        return localStorage.getItem("notesmith_guest_mode") === "true";
+    });
     const [token, setToken] = useState<string | null>(() => {
         const storedToken = localStorage.getItem("notesmith_google_token");
         const expiresAt = localStorage.getItem("notesmith_google_token_expires");
@@ -54,11 +59,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         googleLogin();
     };
 
+    const continueAsGuest = () => {
+        setIsGuest(true);
+        localStorage.setItem("notesmith_guest_mode", "true");
+        setError(null);
+    };
+
     const logout = () => {
         setToken(null);
+        setIsGuest(false);
         setError(null);
         localStorage.removeItem("notesmith_google_token");
         localStorage.removeItem("notesmith_google_token_expires");
+        localStorage.removeItem("notesmith_guest_mode");
     };
 
     const pushData = useCallback(async () => {
@@ -133,11 +146,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return (
         <AuthContext.Provider value={{
-            isLoggedIn: !!token,
+            isLoggedIn: !!token || isGuest,
+            isGuest,
             isSyncing,
             error,
             login,
             logout,
+            continueAsGuest,
             pushData,
             pullData
         }}>
