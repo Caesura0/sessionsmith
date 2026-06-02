@@ -4,10 +4,13 @@ import { downloadBackupFile, resetAllAppData } from "../utils/appDataSync";
 import { usePromptLibrary } from "../hooks/usePromptLibrary";
 import { Download, Upload, AlertTriangle, Cloud, CloudUpload, CloudDownload, LogOut } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "sonner";
+import { useModalStore } from "../store/modalStore";
 
 export function Settings() {
     const { reloadFromStorage } = usePromptLibrary();
     const sync = useAuth();
+    const { confirmDialog } = useModalStore();
     const [showResetConfirm, setShowResetConfirm] = useState(false);
     const [wantBackup, setWantBackup] = useState(true);
 
@@ -33,7 +36,13 @@ export function Settings() {
         if (!file) return;
 
         if (mode === "replace") {
-            if (!window.confirm("WARNING: This will overwrite your entire prompt library. Proceed?")) {
+            const confirmed = await confirmDialog({
+                title: "Replace Prompt Library",
+                message: "WARNING: This will overwrite your entire prompt library. Proceed?",
+                danger: true,
+                confirmText: "Replace Library"
+            });
+            if (!confirmed) {
                 e.target.value = '';
                 return;
             }
@@ -42,9 +51,9 @@ export function Settings() {
         try {
             const summary = await importPromptLibrary(file, mode);
             reloadFromStorage();
-            alert(`Import successful (${summary.mode})!\n\nInterventions: +${summary.interventions.added}, ~${summary.interventions.updated}, =${summary.interventions.kept}\nObservations: +${summary.observations.added}, ~${summary.observations.updated}, =${summary.observations.kept}`);
+            toast.success(`Import successful (${summary.mode})!\n\nInterventions: +${summary.interventions.added}, ~${summary.interventions.updated}, =${summary.interventions.kept}\nObservations: +${summary.observations.added}, ~${summary.observations.updated}, =${summary.observations.kept}`);
         } catch (err: any) {
-            alert(err.message || "Failed to import prompts.");
+            toast.error(err.message || "Failed to import prompts.");
         } finally {
             e.target.value = ''; // reset input
         }
@@ -94,7 +103,7 @@ export function Settings() {
                             <button
                                 onClick={async () => {
                                     await sync.pushData();
-                                    if (!sync.error) alert("Successfully saved to Google Drive!");
+                                    if (!sync.error) toast.success("Successfully saved to Google Drive!");
                                 }}
                                 disabled={sync.isSyncing}
                                 className="rounded-xl bg-accent-blue text-white px-5 py-2.5 text-sm font-medium hover:bg-accent-blue-hover transition-colors disabled:opacity-50"
@@ -114,11 +123,17 @@ export function Settings() {
                             </div>
                             <button
                                 onClick={async () => {
-                                    if (window.confirm("WARNING: This will overwrite your current templates and prompts. Proceed?")) {
+                                    const confirmed = await confirmDialog({
+                                        title: "Restore from Drive",
+                                        message: "WARNING: This will overwrite your current templates and prompts. Proceed?",
+                                        danger: true,
+                                        confirmText: "Restore Data"
+                                    });
+                                    if (confirmed) {
                                         const success = await sync.pullData();
                                         if (success) {
                                             reloadFromStorage();
-                                            alert("Successfully restored from Google Drive!");
+                                            toast.success("Successfully restored from Google Drive!");
                                         }
                                     }
                                 }}

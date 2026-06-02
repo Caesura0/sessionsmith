@@ -58,7 +58,7 @@ export function Layout() {
             <aside className="w-[4.5rem] sm:w-64 border-r border-dark-3 bg-dark-2 flex flex-col shrink-0 transition-all duration-300">
                 <div className="h-16 flex items-center justify-center sm:justify-start sm:px-6 border-b border-dark-3 text-white">
                     <CopyPlus className="w-6 h-6 text-accent-blue" />
-                    <span className="ml-3 font-semibold text-lg hidden sm:block tracking-wide">NoteSmith</span>
+                    <span className="ml-3 font-semibold text-lg hidden sm:block tracking-wide">SessionSmith</span>
                 </div>
 
                 <nav className="flex-1 flex flex-col gap-6 p-3 overflow-y-auto mt-2">

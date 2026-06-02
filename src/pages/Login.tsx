@@ -37,7 +37,7 @@ export function Login() {
                     <CopyPlus className="w-8 h-8 text-accent-blue" />
                 </div>
 
-                <h1 className="text-3xl font-bold text-white tracking-tight mb-2">NoteSmith</h1>
+                <h1 className="text-3xl font-bold text-white tracking-tight mb-2">SessionSmith</h1>
                 <p className="text-light-4 text-center mb-10 text-sm">Sign in to securely sync your templates and prompts to your personal Google Drive.</p>
 
                 {error && (
@@ -62,7 +62,7 @@ export function Login() {
                 </button>
 
                 <p className="mt-8 text-xs text-dark-5 text-center px-4">
-                    NoteSmith uses the restricted Google Drive AppData folder to securely store your configuration. It cannot access your personal files.
+                    SessionSmith uses the restricted Google Drive AppData folder to securely store your configuration. It cannot access your personal files.
                 </p>
             </div>
         </div>

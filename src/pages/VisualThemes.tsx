@@ -51,7 +51,7 @@ export function VisualThemes() {
                     <Palette className="w-8 h-8" />
                     <h1 className="text-3xl font-bold tracking-tight text-white">Visual Themes</h1>
                 </div>
-                <p className="text-light-4 text-lg">Personalize your NoteSmith experience with a curated color palette.</p>
+                <p className="text-light-4 text-lg">Personalize your SessionSmith experience with a curated color palette.</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">

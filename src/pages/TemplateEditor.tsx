@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNoteTemplate } from "../hooks/useNoteTemplate";
 import type { TemplateField, TemplateFieldType } from "../dataDictionary";
 import { Plus, GripVertical, Trash2, Edit3, AlignLeft, ListTodo, Eye, EyeOff } from "lucide-react";
+import { useModalStore } from "../store/modalStore";
 import {
     DndContext,
     closestCenter,
@@ -40,6 +41,7 @@ function SortableFieldItem({
         transition,
         isDragging,
     } = useSortable({ id: field.id });
+    const { confirmDialog } = useModalStore();
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -111,8 +113,14 @@ function SortableFieldItem({
                 {/* Prevent deletion of core default fields */}
                 {!['clientUpdate', 'themes', 'plan', 'interventions', 'observations'].includes(field.id) && (
                     <button
-                        onClick={() => {
-                            if (window.confirm(`Are you sure you want to remove "${field.label}"? Your notes will no longer show this section.`)) {
+                        onClick={async () => {
+                            const confirmed = await confirmDialog({
+                                title: "Remove Section",
+                                message: `Are you sure you want to remove "${field.label}"? Your notes will no longer show this section.`,
+                                danger: true,
+                                confirmText: "Remove Section"
+                            });
+                            if (confirmed) {
                                 onRemove(field.id);
                             }
                         }}
@@ -127,11 +135,8 @@ function SortableFieldItem({
     );
 }
 
-export function TemplateEditor({
-    templateManager
-}: {
-    templateManager: ReturnType<typeof useNoteTemplate>
-}) {
+export function TemplateEditor() {
+    const templateManager = useNoteTemplate();
     const { template, addField, updateFieldLabel, removeField, reorderFields, toggleFieldVisibility } = templateManager;
     const [isAdding, setIsAdding] = useState(false);
     const [newLabel, setNewLabel] = useState("");

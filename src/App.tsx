@@ -10,8 +10,11 @@ import { PromptSetup } from "./pages/PromptSetup";
 import { VisualThemes } from "./pages/VisualThemes";
 import { Settings } from "./pages/Settings";
 import { Login } from "./pages/Login";
+import { TemplateEditor } from "./pages/TemplateEditor";
+import { Toaster } from 'sonner';
+import { GlobalConfirmModal } from './components/GlobalConfirmModal';
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
 export default function App() {
   return (
@@ -29,11 +32,14 @@ export default function App() {
                   <Route path="prompt-setup" element={<PromptSetup />} />
                   <Route path="visual-themes" element={<VisualThemes />} />
                   <Route path="settings" element={<Settings />} />
+                  <Route path="template" element={<TemplateEditor />} />
                 </Route>
               </Route>
             </Routes>
           </BrowserRouter>
         </ThemeProvider>
+        <Toaster theme="dark" position="bottom-right" />
+        <GlobalConfirmModal />
       </AuthProvider>
     </GoogleOAuthProvider>
   );

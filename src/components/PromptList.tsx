@@ -20,6 +20,7 @@ import { usePromptLibrary } from "../hooks/usePromptLibrary";
 import type { PromptSectionKey, PromptItem } from "../dataDictionary";
 import { cn } from "../utils/cn";
 import { Search, Plus } from "lucide-react";
+import { useModalStore } from "../store/modalStore";
 
 function SortablePickerItem({
     opt, active, editingId, editValue, setEditValue, handleEditSave, setEditingId,
@@ -134,6 +135,7 @@ type PromptListProps = {
 
 export function PromptList({ section, selected, onChange, hideControls }: PromptListProps) {
     const { getItems, addItem, updateItem, deleteItem, moveItem, reorderGroupItems } = usePromptLibrary();
+    const { confirmDialog } = useModalStore();
     const allOptions = getItems(section);
 
     const [local, setLocal] = useState<string[]>(selected);
@@ -219,8 +221,14 @@ export function PromptList({ section, selected, onChange, hideControls }: Prompt
         });
     }
 
-    function handleDelete(id: string) {
-        if (window.confirm("Delete this custom prompt?")) {
+    async function handleDelete(id: string) {
+        const confirmed = await confirmDialog({
+            title: "Delete Custom Prompt",
+            message: "Are you sure you want to delete this custom prompt? This action cannot be undone.",
+            danger: true,
+            confirmText: "Delete"
+        });
+        if (confirmed) {
             deleteItem(section, id);
             setLocal(prev => {
                 const next = prev.filter(x => x !== id);

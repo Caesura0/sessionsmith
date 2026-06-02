@@ -116,7 +116,7 @@ export function PromptSetup() {
             {/* Tab Content Area */}
             <section className="flex-1 overflow-auto rounded-2xl border border-dark-3 bg-dark-2/50 backdrop-blur shadow-lg p-4 sm:p-6 mb-8">
                 {activeTab === "structure" ? (
-                    <TemplateEditor templateManager={templateManager} />
+                    <TemplateEditor />
                 ) : (
                     <PickerList
                         key={activeTab}

@@ -10,6 +10,8 @@ import { InlineSessionLine } from "../components/InlineSessionLine";
 import { PrintableNote, type NoteData } from "../components/PrintableNote";
 import { copyNoteToClipboard } from "../utils/clipboard";
 import { buildNoteHTML } from "../utils/noteFormat"; // for preview
+import { toast } from "sonner";
+import { useModalStore } from "../store/modalStore";
 
 export function Editor() {
     const { template } = useNoteTemplate();
@@ -23,6 +25,7 @@ export function Editor() {
         moveSelection,
         cleanDeletedSelections
     } = useNoteDraft();
+    const { confirmDialog } = useModalStore();
 
     // Cleanup dangling selections on mount or library/template change
     useEffect(() => {
@@ -69,10 +72,10 @@ export function Editor() {
     async function handleCopy() {
         try {
             await copyNoteToClipboard(noteData);
-            alert("Copied to clipboard (rich format) – paste into Word.");
+            toast.success("Copied to clipboard (rich format) – paste into Word.");
         } catch (e) {
             console.error(e);
-            alert("Could not copy automatically. Open the preview and copy manually.");
+            toast.error("Could not copy automatically. Open the preview and copy manually.");
             setShowPreview(true);
         }
     }
@@ -81,8 +84,14 @@ export function Editor() {
         window.print();
     };
 
-    const handleClearAll = () => {
-        if (window.confirm("WARNING: This will permanently delete your entire drafted session note. Are you completely sure you want to clear the form?")) {
+    const handleClearAll = async () => {
+        const confirmed = await confirmDialog({
+            title: "Clear Entire Form",
+            message: "WARNING: This will permanently delete your entire drafted session note. Are you completely sure you want to clear the form?",
+            danger: true,
+            confirmText: "Clear Form"
+        });
+        if (confirmed) {
             const defaultMode = sessionModes[0]?.label || "virtual";
             const defaultDuration = Number(sessionDurations[0]?.label) || 60;
 
